@@ -1,6 +1,6 @@
 <meta charset="utf-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no" />
-<title>Tongits</title>
+<title>Bumbay Tongits</title>
 <style>
   @import url('https://fonts.googleapis.com/css2?family=Anton&family=Inter:wght@400;500;600;700&display=swap');
 
@@ -572,19 +572,351 @@
 })(typeof window !== "undefined" ? window : globalThis);
 </script>
 <script>
+/* Tongits netcore — pure room/lobby/move logic, no Firebase, no DOM.
+   The backend layer wraps these in transactions; tests drive them directly.
+   Every function takes/returns a plain room object so it survives JSON round-trips. */
+(function (root) {
+  "use strict";
+  function makeNet(E) {
+    const ALPH = "ABCDEFGHJKLMNPQRSTUVWXYZ23456789";
+    const genCode = () => { let s = ""; for (let i = 0; i < 4; i++) s += ALPH[Math.floor(Math.random() * ALPH.length)]; return s; };
+    const clone = (o) => JSON.parse(JSON.stringify(o));
+
+    function createRoomObj(code, me) {
+      return { code, hostId: me.pid, status: "lobby", updatedAt: Date.now(),
+        players: [{ pid: me.pid, name: me.name, seat: 0 }], game: null };
+    }
+    function joinRoomObj(room, me) {
+      if (!room) throw new Error("No room with that code.");
+      if (room.players.some((p) => p.pid === me.pid)) return room; // already joined
+      if (room.status !== "lobby") throw new Error("That game already started.");
+      if (room.players.length >= 3) throw new Error("That room is full (max 3).");
+      room.players.push({ pid: me.pid, name: me.name, seat: room.players.length });
+      room.updatedAt = Date.now();
+      return room;
+    }
+    function startGameObj(room) {
+      if (!room) throw new Error("Room is gone.");
+      if (room.players.length < 2) throw new Error("Need at least 2 players.");
+      const players = room.players.slice().sort((a, b) => a.seat - b.seat).map((p) => ({ id: p.pid, name: p.name }));
+      room.game = E.newGame(players, { dealer: 0 });
+      room.status = "playing"; room.updatedAt = Date.now();
+      return room;
+    }
+    function applyMoveObj(room, pid, fn) {
+      if (!room || !room.game) throw new Error("Game not found.");
+      const me = room.players.find((p) => p.pid === pid);
+      if (!me) throw new Error("You are not in this game.");
+      if (room.status !== "playing") throw new Error("Round is over.");
+      if (room.game.turn !== me.seat) throw new Error("It's not your turn.");
+      fn(room.game); // engine action; may throw on an illegal move
+      if (room.game.status === "over") room.status = "over";
+      room.updatedAt = Date.now();
+      return room;
+    }
+    function nextRoundObj(room) {
+      if (!room || !room.game) throw new Error("Room is gone.");
+      const prevWinner = room.game.result ? room.game.result.winner : 0;
+      const players = room.players.slice().sort((a, b) => a.seat - b.seat).map((p) => ({ id: p.pid, name: p.name }));
+      room.game = E.newGame(players, { dealer: (prevWinner + 1) % players.length, round: (room.game.round || 1) + 1 });
+      room.status = "playing"; room.updatedAt = Date.now();
+      return room;
+    }
+    function leaveRoomObj(room, pid) {
+      if (!room) return null;
+      if (room.status === "lobby") {
+        room.players = room.players.filter((p) => p.pid !== pid).map((p, i) => ({ ...p, seat: i }));
+        if (room.players.every((p) => p.bot)) return null;
+        if (room.players.length === 0) return null;
+        if (!room.players.some((p) => p.pid === room.hostId)) { const fh = room.players.find((p)=>!p.bot)||room.players[0]; room.hostId = fh.pid; }
+        room.updatedAt = Date.now();
+      }
+      return room;
+    }
+    const BOT_NAMES = ["Bot Rey", "Bot Nena", "Bot Lito"];
+    function addBotObj(room){ if(!room) throw new Error("Room is gone."); if(room.status!=="lobby") throw new Error("The game already started."); if(room.players.length>=3) throw new Error("The room is full (max 3)."); const n=room.players.filter((p)=>p.bot).length; room.players.push({ pid:"bot_"+n+"_"+room.players.length, name:BOT_NAMES[n%BOT_NAMES.length], seat:room.players.length, bot:true }); room.updatedAt=Date.now(); return room; }
+    function removeBotObj(room){ if(!room) throw new Error("Room is gone."); if(room.status!=="lobby") throw new Error("The game already started."); for(let i=room.players.length-1;i>=0;i--){ if(room.players[i].bot){ room.players.splice(i,1); break; } } room.players=room.players.map((p,i)=>({ ...p, seat:i })); room.updatedAt=Date.now(); return room; }
+    return { genCode, clone, createRoomObj, joinRoomObj, startGameObj, applyMoveObj, nextRoundObj, leaveRoomObj, addBotObj, removeBotObj };
+  }
+  if (typeof module !== "undefined" && module.exports) module.exports = makeNet;
+  if (typeof window !== "undefined") root.TongitsNet = makeNet;
+})(typeof window !== "undefined" ? window : globalThis);
+</script>
+<script>
+/* Tongits bot AI — pure, deterministic, plays one full turn via the engine.
+   Deterministic (no RNG) so it's safe to run inside a backend transaction that
+   may re-execute. Strategy is greedy: meld everything it can, lay off spare cards,
+   dump the least-useful high card, and occasionally "call" when its hand is tiny. */
+(function (root) {
+  "use strict";
+  function makeBot(E) {
+    const val = E.cardValue, rank = E.rankOf, suit = E.suitOf;
+
+    // ---- generate candidate melds present in a hand ----
+    function candidateMelds(hand) {
+      const out = [];
+      // sets: 3+ of a rank
+      const byRank = {};
+      hand.forEach((id) => { (byRank[rank(id)] = byRank[rank(id)] || []).push(id); });
+      Object.values(byRank).forEach((ids) => { if (ids.length >= 3) out.push(ids.slice()); });
+      // runs: consecutive same-suit blocks (length >= 3), incl. ace-high
+      for (let s = 0; s < 4; s++) {
+        const ids = hand.filter((id) => suit(id) === s).sort((a, b) => rank(a) - rank(b));
+        if (ids.length < 3) continue;
+        // normal ascending blocks
+        let block = [ids[0]];
+        for (let i = 1; i < ids.length; i++) {
+          if (rank(ids[i]) === rank(ids[i - 1]) + 1) block.push(ids[i]);
+          else { if (block.length >= 3) out.push(block.slice()); block = [ids[i]]; }
+        }
+        if (block.length >= 3) out.push(block.slice());
+        // ace-high: treat A as after K (…Q,K,A)
+        const hasA = ids.find((id) => rank(id) === 1);
+        if (hasA) {
+          const high = ids.filter((id) => rank(id) !== 1).concat(hasA); // A at the end
+          // rebuild consecutive treating A as 14
+          const r = (id) => (rank(id) === 1 ? 14 : rank(id));
+          const sorted = high.sort((a, b) => r(a) - r(b));
+          let b2 = [sorted[0]];
+          for (let i = 1; i < sorted.length; i++) {
+            if (r(sorted[i]) === r(sorted[i - 1]) + 1) b2.push(sorted[i]);
+            else { if (b2.length >= 3 && b2.some((id) => rank(id) === 1)) out.push(b2.slice()); b2 = [sorted[i]]; }
+          }
+          if (b2.length >= 3 && b2.some((id) => rank(id) === 1)) out.push(b2.slice());
+        }
+      }
+      return out.filter((m) => E.isValidMeld(m));
+    }
+    const meldPoints = (ids) => ids.reduce((s, id) => s + val(id), 0);
+
+    // best single meld to lay right now (most points removed, then most cards)
+    function bestMeld(hand) {
+      const c = candidateMelds(hand);
+      if (!c.length) return null;
+      c.sort((a, b) => meldPoints(b) - meldPoints(a) || b.length - a.length);
+      return c[0];
+    }
+    // best meld that includes a specific card (used after taking the discard)
+    function bestMeldWith(hand, card) {
+      const rest = hand.filter((id) => id !== card);
+      let best = null, bestPts = -1;
+      for (let i = 0; i < rest.length; i++)
+        for (let j = i + 1; j < rest.length; j++) {
+          const trio = [card, rest[i], rest[j]];
+          if (E.isValidMeld(trio)) {
+            // try to extend to 4 for extra points
+            let meld = trio;
+            for (let k = 0; k < rest.length; k++) {
+              if (k === i || k === j) continue;
+              if (E.isValidMeld(trio.concat(rest[k]))) { meld = trio.concat(rest[k]); break; }
+            }
+            const p = meldPoints(meld);
+            if (p > bestPts) { bestPts = p; best = meld; }
+          }
+        }
+      return best;
+    }
+
+    function layAll(g, seat) {
+      let m;
+      while (g.status === "playing" && (m = bestMeld(g.hands[seat]))) E.lay(g, m);
+    }
+    function sapawAll(g, seat) {
+      let changed = true;
+      while (changed && g.status === "playing") {
+        changed = false;
+        for (const c of g.hands[seat].slice()) {
+          const target = g.melds.find((mm) => E.canSapaw(c, mm.ids));
+          if (target) { E.sapaw(g, c, target.id); changed = true; if (g.status !== "playing") return; }
+        }
+      }
+    }
+
+    // choose which card to throw: least meld-potential, break ties by highest points
+    function chooseDiscard(g, seat) {
+      const hand = g.hands[seat].filter((c) => c !== g.pendingDiscard);
+      const pool = hand.length ? hand : g.hands[seat];
+      let pick = pool[0], pickScore = Infinity, pickPts = -1;
+      for (const c of pool) {
+        let keep = 0;
+        for (const o of pool) {
+          if (o === c) continue;
+          if (rank(o) === rank(c)) keep += 3;
+          else if (suit(o) === suit(c) && Math.abs(rank(o) - rank(c)) <= 2) keep += 2;
+        }
+        const pts = val(c);
+        if (keep < pickScore || (keep === pickScore && pts > pickPts)) { pickScore = keep; pickPts = pts; pick = c; }
+      }
+      return pick;
+    }
+
+    // play one full turn for `seat`, mutating g via the engine.
+    // Handles both entry phases: the dealer's first turn starts pre-drawn (meld phase).
+    function takeTurn(g, seat) {
+      if (g.status !== "playing" || g.turn !== seat) return;
+      if (g.phase === "draw") {
+        const L = E.legal(g, seat);
+        // conservative call: tiny deadwood and at least one meld down
+        if (L.call && E.handPoints(g.hands[seat]) <= 5) { E.call(g); return; }
+        // draw: take the discard when it completes a meld, else from stock
+        if (L.drawDiscard) E.draw(g, "discard");
+        else if (L.draw) E.draw(g, "stock");
+        else if (L.call) { E.call(g); return; } // stock empty & can't take → call if possible
+        else return;
+      }
+      if (g.status !== "playing") return;
+      // meld phase (we just drew, or it's the dealer's pre-drawn opening turn)
+      // must meld a taken discard card
+      if (g.pendingDiscard != null) {
+        const meld = bestMeldWith(g.hands[seat], g.pendingDiscard);
+        if (meld) E.lay(g, meld);
+      }
+      layAll(g, seat);
+      sapawAll(g, seat);
+      if (g.status !== "playing") return; // went out (tongits)
+      // discard to end the turn
+      E.discard(g, chooseDiscard(g, seat));
+    }
+
+    return { takeTurn, candidateMelds, bestMeld, chooseDiscard };
+  }
+  if (typeof module !== "undefined" && module.exports) module.exports = makeBot;
+  if (typeof window !== "undefined") root.TongitsBot = makeBot;
+})(typeof window !== "undefined" ? window : globalThis);
+</script>
+<script type="module">
+  /* ============================================================================
+     SUPABASE CONFIG — paste yours here.
+     Supabase dashboard -> Project Settings -> API:
+       * Project URL     -> supabaseUrl   (e.g. https://abcdefgh.supabase.co)
+       * anon public key -> supabaseKey   (the long "anon"/"public" key; safe to ship)
+     Run the SQL in SETUP-SUPABASE.md ONCE to create the table, policies & realtime.
+     ============================================================================ */
+  const supabaseUrl = "https://wgpzkdbvbpacjwxtlnuf.supabase.co";
+  const supabaseKey = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6IndncHprZGJ2YnBhY2p3eHRsbnVmIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODQ2NDIzMDAsImV4cCI6MjEwMDIxODMwMH0.-619fycUSQsv9D95aMJRuIKHN7-SlyJkcvlyexA6F1g";
+  /* ========================================================================== */
+  const configured = supabaseUrl && supabaseKey && !/PASTE_ME/.test(supabaseUrl + supabaseKey);
+  if(!configured){
+    window.FB = { ready:false, reason:'config' };
+    window.dispatchEvent(new Event('fb-ready'));
+  } else {
+    try{
+      const { createClient } = await import('https://esm.sh/@supabase/supabase-js@2');
+      const sb = createClient(supabaseUrl, supabaseKey, { realtime:{ params:{ eventsPerSecond:5 } } });
+      const T = 'rooms';
+      const sleep = ms => new Promise(r=>setTimeout(r,ms));
+      window.FB = {
+        ready:true,
+        // live subscription: initial fetch + realtime changes + a slow poll as a safety net
+        watch(code, cb){
+          let lastV = -1;
+          const deliver = row => { if(!row) return; if(row.version===lastV) return; lastV=row.version; cb(JSON.parse(row.data)); };
+          sb.from(T).select('data,version').eq('code',code).maybeSingle().then(({data})=>{ if(data) deliver(data); });
+          const chan = sb.channel('room:'+code)
+            .on('postgres_changes', { event:'*', schema:'public', table:T, filter:'code=eq.'+code }, payload=>{
+               if(payload.eventType==='DELETE'){ cb(null); return; }
+               deliver(payload.new);
+            }).subscribe();
+          const poll = setInterval(async ()=>{ const { data } = await sb.from(T).select('data,version').eq('code',code).maybeSingle(); if(data) deliver(data); }, 2500);
+          return ()=>{ clearInterval(poll); try{ sb.removeChannel(chan); }catch(e){} };
+        },
+        // create only if the code is free (code is the primary key)
+        async create(code, room){
+          const { error } = await sb.from(T).insert({ code, data: JSON.stringify(room), version: 1 });
+          return !error;
+        },
+        // atomic read-modify-write via optimistic version check (compare-and-swap)
+        async transaction(code, mutator){
+          for(let attempt=0; attempt<6; attempt++){
+            const { data: row } = await sb.from(T).select('data,version').eq('code',code).maybeSingle();
+            const cur = row ? JSON.parse(row.data) : null;
+            let out; try{ out = mutator(cur); }catch(e){ window.__lastTxErr=e; return { committed:false, room:cur }; }
+            if(out===undefined) return { committed:false, room:cur };
+            if(out===null){
+              if(!row) return { committed:true, room:null };
+              const { error, count } = await sb.from(T).delete({ count:'exact' }).eq('code',code).eq('version',row.version);
+              if(!error && count) return { committed:true, room:null };
+              await sleep(60+Math.random()*140); continue;
+            }
+            const payload = JSON.stringify(out);
+            if(row){
+              const { data: upd, error } = await sb.from(T).update({ data:payload, version:row.version+1 }).eq('code',code).eq('version',row.version).select('code');
+              if(!error && upd && upd.length===1) return { committed:true, room:out };
+            } else {
+              const { error } = await sb.from(T).insert({ code, data:payload, version:1 });
+              if(!error) return { committed:true, room:out };
+            }
+            await sleep(60+Math.random()*140);
+          }
+          return { committed:false, room:null };
+        },
+      };
+      window.dispatchEvent(new Event('fb-ready'));
+    }catch(err){
+      window.FB = { ready:false, reason:(err&&err.message)||'init-failed' };
+      window.dispatchEvent(new Event('fb-ready'));
+      console.error('Supabase init failed:', err);
+    }
+  }
+</script>
+<script>
 "use strict";
 const E = window.TongitsEngine;
 const $app = document.getElementById('app');
 const $ov  = document.getElementById('overlay');
 const $toastEl = document.getElementById('toast');
 
-/* ---------------- storage helpers (Claude artifact storage) ---------------- */
-const HAS_NET = !!(window.storage && typeof window.storage.get === 'function');
-async function sget(k){ try{ const r=await window.storage.get(k,true); return r?JSON.parse(r.value):null; }catch(e){ return null; } }
-async function sset(k,v){ try{ await window.storage.set(k,JSON.stringify(v),true); return true;}catch(e){ return false; } }
-async function pget(k){ try{ const r=await window.storage.get(k,false); return r?JSON.parse(r.value):null;}catch(e){return null;} }
-async function pset(k,v){ try{ await window.storage.set(k,JSON.stringify(v),false);}catch(e){} }
-const RKEY = c => 'tongits:room:'+c;
+/* ---------------- transport: Supabase (Realtime + Postgres) ---------------- */
+const NET = window.TongitsNet(E);            // pure room/lobby/move logic (shared with tests)
+const BOT = window.TongitsBot(E);            // bot AI
+function netReady(){ return !!(window.FB && window.FB.ready); }
+/* per-browser identity + last room, in the browser's own localStorage */
+function lget(k){ try{ const v=localStorage.getItem(k); return v?JSON.parse(v):null; }catch(e){ return null; } }
+function lset(k,v){ try{ localStorage.setItem(k, JSON.stringify(v)); }catch(e){} }
+/* live subscription: the backend pushes every change straight into render() */
+function subscribe(code){
+  teardownOnline();
+  S.watchCode=code;
+  S.unsub=window.FB.watch(code, room=>{ if(S.watchCode===code) onRoomUpdate(room); });
+}
+function teardownOnline(){ if(S.unsub){ try{S.unsub();}catch(e){} S.unsub=null; } S.watchCode=null; }
+function onRoomUpdate(room){
+  if(!room){ if(S.mode==='online'){ toast('The room was closed.'); teardownOnline(); S.room=null; S.mode=null; S.screen='home'; render(); } return; }
+  S.room=room;
+  if(S.screen==='lobby' && room.status!=='lobby'){ S.screen='game'; S.selection=[]; }
+  render();
+  maybeRunOnlineBot();
+}
+/* only the host drives bot seats online, one bot turn per state, de-duped by token */
+function maybeRunOnlineBot(){
+  if(S.mode!=='online' || !S.room || !window.FB || !window.FB.ready) return;
+  const room=S.room;
+  if(room.hostId!==S.me.pid || room.status!=='playing' || !room.game) return;
+  const seat=room.game.turn;
+  const p=room.players.find(x=>x.seat===seat);
+  if(!p || !p.bot) return;
+  const g=room.game;
+  const token=room.code+'#'+(g.round||1)+'#'+seat+'#'+g.stock.length+'#'+g.discard.length+'#'+g.phase;
+  if(S.botToken===token) return;
+  S.botToken=token;
+  clearTimeout(S.botTimer);
+  S.botTimer=setTimeout(async ()=>{
+    try{
+      await window.FB.transaction(room.code, r=>{
+        if(!r || r.status!=='playing' || !r.game) return;
+        if(r.game.turn!==seat) return;
+        const pp=r.players.find(x=>x.seat===seat); if(!pp || !pp.bot) return;
+        BOT.takeTurn(r.game, seat);
+        if(r.game.status==='over') r.status='over';
+        return r;
+      });
+    }catch(e){}
+    S.botToken=null; // allow the next bot state to schedule
+  }, 850);
+}
+async function addBot(){ await window.FB.transaction(S.room.code, room=>{ if(!room||room.hostId!==S.me.pid) return; return NET.addBotObj(room); }); }
+async function removeBot(){ await window.FB.transaction(S.room.code, room=>{ if(!room||room.hostId!==S.me.pid) return; return NET.removeBotObj(room); }); }
+function enterRoom(code){ S.mode='online'; S.screen='lobby'; S.selection=[]; $ov.innerHTML=''; lset('tongits:last',{code, name:S.me.name}); subscribe(code); }
 
 /* ---------------- app state ---------------- */
 const S = {
@@ -592,7 +924,7 @@ const S = {
   me:{ pid:null, name:'' },
   room:null, seat:null,
   local:null,
-  selection:[], curtain:null, poll:null, busy:false,
+  selection:[], curtain:null, busy:false, unsub:null, watchCode:null, botTimer:null, botToken:null,
 };
 
 function genPid(){ return 'p'+Math.random().toString(36).slice(2,10)+Date.now().toString(36).slice(-4); }
@@ -630,10 +962,10 @@ function renderHome(){
         <label for="nm">Your name</label>
         <input id="nm" maxlength="14" placeholder="e.g. Ate Rica" value="${esc(S.me.name)}"/>
       </div>
-      <button class="btn primary" id="b-online" ${HAS_NET?'':'disabled'}>Play online with friends</button>
+      <button class="btn primary" id="b-online" ${netReady()?'':'disabled'}>Play online with friends</button>
       <button class="btn" id="b-local">Pass &amp; play on this device</button>
       <button class="btn ghost sm" id="b-rules" style="width:100%">How to play</button>
-      ${HAS_NET?'':'<div class="note">Online play needs Claude’s shared storage, which isn’t available here. Pass &amp; play works fully.</div>'}
+      ${netReady()?'':'<div class="note">Add your Supabase URL + key near the top of the file to enable online play. Solo-vs-bots and pass &amp; play work right now.</div>'}
     </div>
   </div>`;
   const nm=document.getElementById('nm');
@@ -664,40 +996,25 @@ function showOnlineMenu(){
 }
 
 async function createRoom(){
+  if(!netReady()){ toast('Add your Supabase URL + key to enable online play.'); return; }
   if(S.busy)return; S.busy=true;
-  let code, tries=0;
-  do{ code=genCode(); tries++; } while(await sget(RKEY(code)) && tries<8);
-  const room={ code, hostId:S.me.pid, status:'lobby', version:1, updatedAt:Date.now(),
-    players:[{pid:S.me.pid, name:S.me.name, seat:0}], game:null };
-  const okw=await sset(RKEY(code), room);
+  let code, made=false, tries=0;
+  do{ code=NET.genCode(); made=await window.FB.create(code, NET.createRoomObj(code, S.me)); tries++; } while(!made && tries<6);
   S.busy=false;
-  if(!okw){ toast('Could not reach shared storage.'); return; }
-  S.room=room; S.mode='online'; S.seat=0; S.screen='lobby'; $ov.innerHTML='';
-  await pset('tongits:last',{code, name:S.me.name});
-  startPolling(); render();
+  if(!made){ toast('Could not create a room — check your connection.'); return; }
+  enterRoom(code);
 }
 
 async function joinRoom(code){
-  if(S.busy)return; S.busy=true;
-  let joined=false;
-  for(let t=0;t<5 && !joined;t++){
-    const room=await sget(RKEY(code));
-    if(!room){ toast('No room with code '+code+'.'); break; }
-    if(room.players.some(p=>p.pid===S.me.pid)){ S.room=room; joined=true; break; }
-    if(room.status!=='lobby'){ toast('That game already started.'); break; }
-    if(room.players.length>=3){ toast('That room is full (max 3).'); break; }
-    room.players.push({pid:S.me.pid, name:S.me.name, seat:room.players.length});
-    room.version++; room.updatedAt=Date.now();
-    await sset(RKEY(code), room);
-    await new Promise(r=>setTimeout(r,120+Math.random()*180));
-    const check=await sget(RKEY(code));
-    if(check && check.players.some(p=>p.pid===S.me.pid)){ S.room=check; joined=true; }
-  }
+  if(!netReady()){ toast('Add your Supabase URL + key to enable online play.'); return; }
+  if(S.busy)return; S.busy=true; window.__lastTxErr=null;
+  let res;
+  try{ res=await window.FB.transaction(code, room=> NET.joinRoomObj(room, S.me)); }
+  catch(e){ res={committed:false}; }
   S.busy=false;
-  if(!joined) return;
-  S.mode='online'; S.seat=S.room.players.find(p=>p.pid===S.me.pid).seat; S.screen='lobby'; $ov.innerHTML='';
-  await pset('tongits:last',{code, name:S.me.name});
-  startPolling(); render();
+  const inRoom = res && res.committed && res.room && res.room.players.some(p=>p.pid===S.me.pid);
+  if(!inRoom){ toast((window.__lastTxErr && window.__lastTxErr.message) || ('Could not join '+code+'.')); window.__lastTxErr=null; return; }
+  enterRoom(code);
 }
 
 function mySeat(){ if(S.mode!=='online'||!S.room) return null; const p=S.room.players.find(p=>p.pid===S.me.pid); return p?p.seat:null; }
@@ -708,9 +1025,10 @@ function renderLobby(){
   const r=S.room, isHost=r.hostId===S.me.pid;
   const seats=[0,1,2].map(i=>{
     const p=r.players.find(x=>x.seat===i);
-    if(p) return `<div class="seatrow"><span class="dot"></span>${esc(p.name)}${p.pid===S.me.pid?' <span class="muted">(you)</span>':''}${p.pid===r.hostId?'<span class="tag">host</span>':''}</div>`;
+    if(p) return `<div class="seatrow"><span class="dot"></span>${p.bot?'🤖 ':''}${esc(p.name)}${p.pid===S.me.pid?' <span class="muted">(you)</span>':''}${p.bot?'<span class="tag">bot</span>':''}${p.pid===r.hostId?'<span class="tag">host</span>':''}</div>`;
     return `<div class="seatrow empty"><span class="dot" style="background:#555;box-shadow:none"></span>Waiting…</div>`;
   }).join('');
+  const botCount=r.players.filter(p=>p.bot).length;
   $app.innerHTML=`
   <div class="topbar"><span class="brandsm">TONGITS</span>
     <div class="rt"><button class="btn ghost sm" id="leave">Leave</button></div></div>
@@ -720,93 +1038,117 @@ function renderLobby(){
       <div class="code">${r.code}</div>
       <button class="btn sm ghost" id="copy" style="width:100%">Copy code</button>
       <div class="seatlist">${seats}</div>
+      ${isHost ? `<div class="row" style="gap:8px">
+          <button class="btn ghost sm" id="addbot" style="flex:1" ${r.players.length>=3?'disabled':''}>+ Add bot</button>
+          <button class="btn ghost sm" id="rmbot" style="flex:1" ${botCount<1?'disabled':''}>− Remove bot</button>
+        </div>` : ''}
       ${isHost
         ? `<button class="btn primary" id="start" ${r.players.length>=2?'':'disabled'}>Deal & start (${r.players.length}/3)</button>
-           ${r.players.length<2?'<p class="muted center">Need at least one more player.</p>':''}`
+           ${r.players.length<2?'<p class="muted center">Add a friend (share the code) or a bot to begin.</p>':''}`
         : `<p class="muted center">Waiting for the host to deal…</p>`}
     </div>
   </div>`;
   document.getElementById('copy').onclick=async()=>{ try{ await navigator.clipboard.writeText(r.code); toast('Code copied.'); }catch(e){ toast('Copy failed — read it aloud 🙂'); } };
   document.getElementById('leave').onclick=leaveRoom;
-  if(isHost) document.getElementById('start').onclick=startOnlineGame;
+  if(isHost){
+    document.getElementById('start').onclick=startOnlineGame;
+    const ab=document.getElementById('addbot'), rb=document.getElementById('rmbot');
+    if(ab) ab.onclick=addBot; if(rb) rb.onclick=removeBot;
+  }
 }
 
 async function startOnlineGame(){
-  const latest=await sget(RKEY(S.room.code)); if(!latest){toast('Lost the room.');return;}
-  if(latest.players.length<2){ toast('Need 2+ players.'); return; }
-  latest.game=E.newGame(latest.players.slice().sort((a,b)=>a.seat-b.seat).map(p=>({id:p.pid,name:p.name})),{dealer:0});
-  latest.status='playing'; latest.version++; latest.updatedAt=Date.now();
-  await sset(RKEY(S.room.code), latest);
-  S.room=latest; S.screen='game'; S.selection=[]; render();
+  window.__lastTxErr=null;
+  const res=await window.FB.transaction(S.room.code, room=>{ if(!room||room.hostId!==S.me.pid) return; return NET.startGameObj(room); });
+  if(!res.committed){ toast((window.__lastTxErr&&window.__lastTxErr.message)||'Could not start the game.'); window.__lastTxErr=null; }
+  // the live subscription flips everyone (including us) to the table
 }
 
 async function leaveRoom(){
-  stopPolling();
-  if(S.room){
-    const latest=await sget(RKEY(S.room.code));
-    if(latest && latest.status==='lobby'){
-      latest.players=latest.players.filter(p=>p.pid!==S.me.pid).map((p,i)=>({...p,seat:i}));
-      if(latest.players.length){ if(!latest.players.some(p=>p.pid===latest.hostId)) latest.hostId=latest.players[0].pid; latest.version++; latest.updatedAt=Date.now(); await sset(RKEY(S.room.code),latest); }
-    }
-  }
+  const code=S.room&&S.room.code;
+  teardownOnline();
+  if(code){ try{ await window.FB.transaction(code, room=> NET.leaveRoomObj(room, S.me.pid)); }catch(e){} }
   S.room=null; S.mode=null; S.seat=null; S.screen='home'; render();
 }
 
-/* ---------------- POLLING (online sync) ---------------- */
-function startPolling(){ stopPolling(); S.poll=setInterval(pollTick, 1600); }
-function stopPolling(){ if(S.poll){ clearInterval(S.poll); S.poll=null; } }
-async function pollTick(){
-  if(!S.room || S.mode!=='online') return;
-  const latest=await sget(RKEY(S.room.code));
-  if(!latest) return;
-  if(latest.version!==S.room.version){
-    const wasScreen=S.screen;
-    S.room=latest;
-    if(latest.status==='playing' && S.screen==='lobby'){ S.screen='game'; S.selection=[]; }
-    render();
-  } else if(S.screen==='lobby'){
-    S.room=latest; renderLobby(); // refresh seat list even without version bump
-  }
-}
+/* online sync is push-based via window.FB.watch → onRoomUpdate (see transport, above) */
 
-/* ---------------- LOCAL (pass & play) ---------------- */
+/* ---------------- LOCAL (pass & play, with optional bots) ---------------- */
+const LOCAL_PRESETS = [
+  { label:'You vs 2 bots',     humans:1, bots:2 },
+  { label:'You vs 1 bot',      humans:1, bots:1 },
+  { label:'2 players',         humans:2, bots:0 },
+  { label:'2 players + 1 bot', humans:2, bots:1 },
+  { label:'3 players',         humans:3, bots:0 },
+];
 function showLocalSetup(){
+  const presets=LOCAL_PRESETS.map((p,i)=>`<button class="btn ${i===0?'primary':''}" data-preset="${i}" style="width:100%">${p.label}</button>`).join('');
   $ov.innerHTML=`<div class="overlay"><div class="sheet">
-    <h2>Pass &amp; play</h2>
-    <p class="muted">One device, passed around. Between turns the screen hides so the next player can’t see your hand.</p>
-    <h3>How many players?</h3>
-    <div class="row" style="margin:6px 0 14px">
-      <button class="btn primary" data-n="2" style="flex:1">2 players</button>
-      <button class="btn primary" data-n="3" style="flex:1">3 players</button>
-    </div>
+    <h2>Play on this device</h2>
+    <p class="muted">Pick who's playing. Bots take their own turns automatically. With two or more humans, the screen hides between turns so nobody sees your hand.</p>
+    <div class="stack" style="margin:10px 0">${presets}</div>
     <div id="names" class="stack"></div>
     <button class="btn ghost sm" id="l-cancel" style="width:100%;margin-top:10px">Back</button>
   </div></div>`;
   document.getElementById('l-cancel').onclick=()=>{$ov.innerHTML='';};
-  $ov.querySelectorAll('[data-n]').forEach(b=> b.onclick=()=>buildNameFields(+b.dataset.n));
-  buildNameFields(3);
+  $ov.querySelectorAll('[data-preset]').forEach(b=> b.onclick=()=>{
+    $ov.querySelectorAll('[data-preset]').forEach(x=>x.classList.remove('primary'));
+    b.classList.add('primary');
+    buildNameFields(LOCAL_PRESETS[+b.dataset.preset]);
+  });
+  buildNameFields(LOCAL_PRESETS[0]);
 }
-function buildNameFields(n){
+function buildNameFields(preset){
   const box=document.getElementById('names'); if(!box)return;
   let html='';
-  for(let i=0;i<n;i++){ const dflt=i===0?S.me.name:('Player '+(i+1)); html+=`<div class="field"><label>Player ${i+1}</label><input class="lnm" maxlength="14" value="${esc(dflt)}"/></div>`; }
+  for(let i=0;i<preset.humans;i++){ const dflt=i===0?(S.me.name||'You'):('Player '+(i+1)); html+=`<div class="field"><label>Player ${i+1}${i===0?' (you)':''}</label><input class="lnm" maxlength="14" value="${esc(dflt)}"/></div>`; }
+  if(preset.bots) html+=`<p class="muted">+ ${preset.bots} bot${preset.bots>1?'s':''}</p>`;
   html+=`<button class="btn primary" id="l-start" style="margin-top:6px">Deal & start</button>`;
   box.innerHTML=html;
   document.getElementById('l-start').onclick=()=>{
     const names=[...box.querySelectorAll('.lnm')].map((x,i)=>x.value.trim()||('Player '+(i+1)));
-    startLocalGame(names);
+    startLocalGame(preset, names);
   };
 }
-function startLocalGame(names){
-  const game=E.newGame(names.map((nm,i)=>({id:'L'+i,name:nm})),{dealer:0});
-  S.local={ game, names }; S.mode='local'; S.screen='game'; S.selection=[]; $ov.innerHTML='';
-  render();
+function startLocalGame(preset, names){
+  const players=[];
+  for(let i=0;i<preset.humans;i++) players.push({ name:names[i]||('Player '+(i+1)), bot:false, seat:players.length });
+  const bn=['Bot Rey','Bot Nena','Bot Lito'];
+  for(let b=0;b<preset.bots;b++) players.push({ name:bn[b%bn.length], bot:true, seat:players.length });
+  const game=E.newGame(players.map((p,i)=>({id:'L'+i,name:p.name})),{dealer:0});
+  const firstHuman=players.findIndex(p=>!p.bot);
+  S.local={ game, players, viewer: firstHuman<0?0:firstHuman };
+  S.mode='local'; S.screen='game'; S.selection=[]; $ov.innerHTML='';
+  localKickoff();
+}
+function localHumanSeats(){ return S.local.players.filter(p=>!p.bot).map(p=>p.seat); }
+function isBotSeat(seat){
+  if(S.mode==='online'){ const p=S.room&&S.room.players.find(x=>x.seat===seat); return !!(p&&p.bot); }
+  const p=S.local&&S.local.players[seat]; return !!(p&&p.bot);
+}
+function localKickoff(){
+  const g=S.local.game;
+  if(g.status!=='playing'){ render(); return; }
+  if(isBotSeat(g.turn)){ render(); scheduleLocalBot(); }
+  else { S.local.viewer=g.turn; render(); }
+}
+function scheduleLocalBot(){
+  clearTimeout(S.botTimer);
+  S.botTimer=setTimeout(()=>{
+    const g=S.local&&S.local.game;
+    if(!g || S.mode!=='local' || g.status!=='playing' || !isBotSeat(g.turn)){ return; }
+    try{ BOT.takeTurn(g, g.turn); }catch(e){}
+    if(g.status!=='playing'){ render(); return; }
+    if(isBotSeat(g.turn)){ render(); scheduleLocalBot(); return; }
+    if(localHumanSeats().length>=2){ S.curtain={ name:g.players[g.turn].name, seat:g.turn }; render(); return; }
+    S.local.viewer=g.turn; render();
+  }, 750);
 }
 
 /* which game object + view perspective are we showing? */
 function G(){ return S.mode==='online' ? (S.room&&S.room.game) : (S.local&&S.local.game); }
-function viewSeat(){ return S.mode==='online' ? mySeat() : G().turn; }
-function canAct(){ const g=G(); if(!g) return false; return S.mode==='online' ? g.turn===mySeat() : true; }
+function viewSeat(){ return S.mode==='online' ? mySeat() : (S.local?S.local.viewer:0); }
+function canAct(){ const g=G(); if(!g) return false; if(isBotSeat(g.turn)) return false; return S.mode==='online' ? g.turn===mySeat() : g.turn===S.local.viewer; }
 
 /* ---------------- TABLE ---------------- */
 function renderTable(){
@@ -828,7 +1170,7 @@ function renderTable_board(g){
     const p=g.players[si]; const cnt=g.hands[si].length;
     const backs = Array.from({length:Math.min(cnt,12)}).map(()=>`<div class="cb small"></div>`).join('');
     return `<div class="seat ${g.turn===si?'active':''}">
-      <div class="nm">${esc(p.name)} ${g.turn===si?'<span class="badge">turn</span>':''}</div>
+      <div class="nm">${isBotSeat(si)?'🤖 ':''}${esc(p.name)} ${g.turn===si?'<span class="badge">turn</span>':''}</div>
       <div class="meta">${cnt} cards${g.melds.some(m=>m.owner===si)?' · has melds':''}</div>
       <div class="backrow">${backs}</div></div>`;
   }).join('');
@@ -862,7 +1204,8 @@ function renderTable_board(g){
 
   // hint + actions
   let hint='';
-  if(!act) hint=`Waiting for ${esc(g.players[g.turn].name)}…`;
+  if(!act && isBotSeat(g.turn)) hint=`🤖 ${esc(g.players[g.turn].name)} is playing…`;
+  else if(!act) hint=`Waiting for ${esc(g.players[g.turn].name)}…`;
   else if(g.phase==='draw') hint='Draw from the stock, or take the discard to complete a meld.';
   else if(g.pendingDiscard!=null && g.hands[me].includes(g.pendingDiscard)) hint=`You must meld the ${E.label(g.pendingDiscard)} you took before discarding.`;
   else if(sel.length===1) hint='Tap a glowing meld to lay this card off, or pick more cards to meld / discard.';
@@ -945,22 +1288,28 @@ function confirmCall(){
 async function doAction(fn){
   const g=G(); if(!g) return;
   if(S.mode==='online'){
-    if(S.busy) return; S.busy=true;
-    const latest=await sget(RKEY(S.room.code));
-    if(!latest){ S.busy=false; toast('Lost connection to the room.'); return; }
-    if(latest.status!=='playing'){ S.room=latest; S.busy=false; render(); return; }
-    if(latest.game.turn!==mySeat()){ S.room=latest; S.busy=false; S.selection=[]; toast("Hang tight — it's not your turn."); render(); return; }
-    try{ fn(latest.game); }
-    catch(err){ S.busy=false; toast(err.message); return; }
-    latest.version++; latest.updatedAt=Date.now();
-    if(latest.game.status==='over') latest.status='over';
-    await sset(RKEY(S.room.code), latest);
-    S.room=latest; S.selection=[]; S.busy=false; render();
+    if(S.busy) return;
+    const room=S.room;
+    if(!room||!room.game){ toast('Lost connection to the room.'); return; }
+    if(room.game.turn!==mySeat()){ S.selection=[]; toast("Hang tight — it's not your turn."); render(); return; }
+    try{ const probe=NET.clone(room); fn(probe.game); }         // friendly pre-check for a clear error
+    catch(err){ toast(err.message); return; }
+    S.busy=true; window.__lastTxErr=null;
+    let res; try{ res=await window.FB.transaction(room.code, r=> NET.applyMoveObj(r, S.me.pid, fn)); }
+    catch(e){ res={committed:false}; }
+    S.busy=false; S.selection=[];
+    if(!res.committed){ toast((window.__lastTxErr&&window.__lastTxErr.message)||'Move not applied — resyncing.'); window.__lastTxErr=null; }
+    render();
   } else {
     const before=g.turn;
     try{ fn(g); }catch(err){ toast(err.message); return; }
     S.selection=[];
-    if(g.status==='playing' && g.turn!==before){ S.curtain={ name:g.players[g.turn].name }; }
+    if(g.status!=='playing'){ render(); return; }
+    if(g.turn!==before){
+      if(isBotSeat(g.turn)){ render(); scheduleLocalBot(); return; }
+      if(localHumanSeats().length>=2){ S.curtain={ name:g.players[g.turn].name, seat:g.turn }; render(); return; }
+      S.local.viewer=g.turn; render(); return;
+    }
     render();
   }
 }
@@ -974,7 +1323,7 @@ function renderCurtain(){
     <div class="who">${esc(S.curtain.name)}</div>
     <p class="muted">Pass the device. Others, look away!</p>
     <button class="btn primary" id="cx" style="width:auto;padding:14px 26px">I’m ${esc(S.curtain.name)} — show my hand</button>`;
-  document.getElementById('cx').onclick=()=>{ S.curtain=null; render(); };
+  document.getElementById('cx').onclick=()=>{ if(S.curtain&&S.curtain.seat!=null&&S.local) S.local.viewer=S.curtain.seat; S.curtain=null; render(); };
 }
 
 /* ---------------- ROUND OVER ---------------- */
@@ -1002,16 +1351,15 @@ function showRoundOver(g){
 async function nextRound(g){
   const prevWinner=g.result.winner;
   if(S.mode==='online'){
-    const latest=await sget(RKEY(S.room.code)); if(!latest)return;
-    const players=latest.players.slice().sort((a,b)=>a.seat-b.seat).map(p=>({id:p.pid,name:p.name}));
-    latest.game=E.newGame(players,{dealer:(prevWinner+1)%players.length, round:(g.round||1)+1});
-    latest.status='playing'; latest.version++; latest.updatedAt=Date.now();
-    await sset(RKEY(S.room.code), latest);
-    S.room=latest; S.selection=[]; render();
+    window.__lastTxErr=null;
+    const res=await window.FB.transaction(S.room.code, room=>{ if(!room||room.hostId!==S.me.pid) return; return NET.nextRoundObj(room); });
+    if(!res.committed){ toast((window.__lastTxErr&&window.__lastTxErr.message)||'Waiting for the host.'); window.__lastTxErr=null; }
+    // the subscription pushes the fresh deal to everyone
   } else {
-    const names=S.local.names;
-    S.local.game=E.newGame(names.map((nm,i)=>({id:'L'+i,name:nm})),{dealer:(prevWinner+1)%names.length, round:(g.round||1)+1});
-    S.selection=[]; $ov.innerHTML=''; render();
+    const players=S.local.players;
+    S.local.game=E.newGame(players.map((p,i)=>({id:'L'+i,name:p.name})),{dealer:(prevWinner+1)%players.length, round:(g.round||1)+1});
+    S.local.viewer=localHumanSeats()[0]||0;
+    S.selection=[]; $ov.innerHTML=''; localKickoff();
   }
 }
 
@@ -1039,16 +1387,17 @@ function showRules(){
 
 /* ---------------- test hook (only active when a test sets the flag) -------- */
 if (window.__TONGITS_TEST__) {
-  window.__tongits = { get S(){return S;}, pollTick, G, mySeat, render };
+  window.__tongits = { get S(){return S;}, G, mySeat, render, onRoomUpdate, maybeRunOnlineBot, isBotSeat, NET, BOT };
 }
 
 /* ---------------- boot ---------------- */
-(async function boot(){
-  let pid = await pget('tongits:pid');
-  if(!pid){ pid=genPid(); await pset('tongits:pid', pid); }
+(function boot(){
+  let pid = lget('tongits:pid');
+  if(!pid){ pid=genPid(); lset('tongits:pid', pid); }
   S.me.pid = typeof pid==='string'?pid:(pid.pid||genPid());
-  const last = await pget('tongits:last');
+  const last = lget('tongits:last');
   if(last && last.name) S.me.name=last.name;
   render();
+  window.addEventListener('fb-ready', ()=>{ if(S.screen==='home') renderHome(); });
 })();
 </script>
