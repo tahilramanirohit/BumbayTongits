@@ -1,9 +1,12 @@
+
+
+Index · HTML
 <meta charset="utf-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no" />
-<title>Bumbay Tongits</title>
+<title>Tongits</title>
 <style>
   @import url('https://fonts.googleapis.com/css2?family=Anton&family=Inter:wght@400;500;600;700&display=swap');
-
+ 
   :root{
     --felt-1:#0e6b47; --felt-2:#0a4d33; --felt-3:#063422;
     --rail:#241209; --rail-2:#3a1e10;
@@ -35,7 +38,7 @@
   button{font-family:var(--body); cursor:pointer; border:none; color:inherit; font-size:1rem}
   button:focus-visible{outline:3px solid var(--brass-hi); outline-offset:2px}
   .app{min-height:100dvh; display:flex; flex-direction:column}
-
+ 
   /* ---------- shared bits ---------- */
   .marquee{
     text-align:center; padding:6px 0 2px;
@@ -49,7 +52,7 @@
   .marquee .suits{letter-spacing:.5em; font-size:clamp(14px,4vw,20px); color:var(--brass); margin-top:2px}
   .marquee .suits .r{color:#e0745f}
   .tagline{color:var(--ink-dim); text-align:center; font-size:.9rem; margin:2px 0 0}
-
+ 
   .btn{
     background:linear-gradient(180deg,#136c4a,#0c4d34);
     border:1px solid rgba(242,212,136,.35);
@@ -64,7 +67,7 @@
   .btn.ghost{background:rgba(0,0,0,.22); border:1px solid rgba(255,255,255,.14)}
   .btn:disabled{opacity:.4; cursor:not-allowed; box-shadow:none}
   .btn.sm{padding:9px 12px; font-size:.9rem; width:auto; border-radius:11px}
-
+ 
   .panel{
     width:min(560px,92vw); margin:0 auto; padding:22px;
     background:linear-gradient(180deg, rgba(6,42,28,.72), rgba(6,42,28,.55));
@@ -89,7 +92,7 @@
   .row.wrap{flex-wrap:wrap}
   .center{text-align:center}
   a.link{color:var(--brass-hi); cursor:pointer; text-decoration:underline}
-
+ 
   /* ---------- lobby ---------- */
   .code{
     font-family:var(--display); font-size:clamp(40px,13vw,64px); letter-spacing:.16em;
@@ -103,12 +106,12 @@
   .seatrow .dot{width:9px;height:9px;border-radius:50%;background:var(--ok);box-shadow:0 0 8px var(--ok)}
   .seatrow.empty{opacity:.5; font-style:italic}
   .seatrow .tag{margin-left:auto; font-size:.72rem; color:var(--brass); border:1px solid var(--brass-dim); padding:2px 7px; border-radius:20px}
-
+ 
   /* ---------- table ---------- */
   .topbar{display:flex; align-items:center; gap:10px; padding:8px 12px}
   .topbar .rt{margin-left:auto; display:flex; gap:8px}
   .brandsm{font-family:var(--display); font-size:22px; color:var(--brass-hi); letter-spacing:.06em}
-
+ 
   .table{flex:1; display:flex; flex-direction:column; gap:8px; padding:4px 10px 10px; position:relative}
   .opponents{display:flex; gap:10px; justify-content:center; flex-wrap:wrap}
   .seat{
@@ -123,7 +126,7 @@
   .backrow{display:flex; margin-top:6px; min-height:34px}
   .backrow .cb{margin-left:-16px}
   .backrow .cb:first-child{margin-left:0}
-
+ 
   .middle{display:flex; align-items:center; justify-content:center; gap:18px; padding:8px 0}
   .pile{display:flex; flex-direction:column; align-items:center; gap:4px}
   .pile .lbl{font-size:.72rem; color:var(--ink-dim); letter-spacing:.08em; text-transform:uppercase}
@@ -132,7 +135,7 @@
   }
   .discardslot{width:66px;height:92px;border-radius:9px; display:flex;align-items:center;justify-content:center;
     border:2px dashed rgba(255,255,255,.18)}
-
+ 
   /* card */
   .card{
     width:66px;height:92px;border-radius:9px;background:var(--cream);
@@ -164,7 +167,7 @@
     bottom:6px; color:#2a1e05; background:var(--brass-hi); font-weight:800; font-size:.8rem; width:26px;height:26px;
     border-radius:50%; margin:0 auto; display:flex; align-items:center; justify-content:center;
     box-shadow:0 2px 6px rgba(0,0,0,.4)}
-
+ 
   /* melds band */
   .melds{display:flex; gap:12px; overflow-x:auto; padding:6px 2px; min-height:70px; scrollbar-width:thin}
   .meldgroup{flex:0 0 auto; background:rgba(0,0,0,.2); border:1px solid rgba(255,255,255,.08); border-radius:12px; padding:6px 8px}
@@ -174,7 +177,7 @@
   .meld .card:first-child{margin-left:0}
   .meld.armable{cursor:pointer; padding:3px; margin:-3px; border-radius:10px; box-shadow:0 0 0 2px var(--brass-hi); animation:pulse 1.4s infinite}
   @keyframes pulse{50%{box-shadow:0 0 0 2px var(--brass-hi),0 0 16px rgba(242,212,136,.5)}}
-
+ 
   /* your hand */
   .handwrap{margin-top:auto}
   .youbar{display:flex; align-items:center; gap:8px; padding:2px 4px 4px}
@@ -186,10 +189,10 @@
   .hand .card.sel{transform:translateY(-16px); box-shadow:0 10px 18px rgba(0,0,0,.5), 0 0 0 2px var(--brass-hi)}
   .hand .card:hover{transform:translateY(-6px)}
   .hand .card.sel:hover{transform:translateY(-16px)}
-
+ 
   .actions{display:flex; gap:8px; padding:8px 6px 12px; flex-wrap:wrap; justify-content:center}
   .hint{font-size:.8rem; color:var(--brass-hi); text-align:center; min-height:18px; padding:0 8px}
-
+ 
   /* overlays */
   .overlay{position:fixed; inset:0; background:rgba(3,20,13,.78); backdrop-filter:blur(4px);
     display:flex; align-items:center; justify-content:center; padding:18px; z-index:40}
@@ -206,25 +209,45 @@
   .curtain{position:fixed; inset:0; z-index:50; background:linear-gradient(160deg,#0a4d33,#052015);
     display:flex; flex-direction:column; align-items:center; justify-content:center; gap:18px; padding:24px; text-align:center}
   .curtain .who{font-family:var(--display); font-size:clamp(30px,9vw,54px); color:var(--brass-hi); letter-spacing:.04em}
-
+ 
   .toast{position:fixed; left:50%; bottom:18px; transform:translateX(-50%);
     background:rgba(0,0,0,.82); color:var(--ink); padding:11px 16px; border-radius:12px;
     border:1px solid rgba(242,212,136,.3); font-size:.9rem; z-index:60; box-shadow:var(--shadow);
     max-width:90vw; text-align:center}
   .logline{font-size:.78rem; color:var(--ink-dim); text-align:center; padding:0 10px 4px; min-height:16px}
-
+ 
   @media (prefers-reduced-motion: reduce){ *{animation:none !important; transition:none !important} }
   @media (max-width:420px){
     .card,.cb,.stockchip,.discardslot{width:52px;height:73px}
     .card .pip{font-size:24px}.card .c-r{font-size:13px}
     .seat{min-width:104px}
   }
+ 
+  /* ---- landing / brand / timer / fight ---- */
+  .sitehead{ text-align:center; font-family:var(--display); letter-spacing:.05em; color:var(--brass-hi);
+    font-size:clamp(20px,5.5vw,32px); padding:16px 0 2px; text-shadow:0 2px 0 var(--brass-dim); }
+  .landing{ flex:1; display:flex; flex-direction:column; align-items:center; justify-content:center; gap:16px; padding:20px 16px 52px; }
+  .gametile{ width:min(430px,92vw); background:linear-gradient(180deg, rgba(6,42,28,.82), rgba(6,42,28,.55));
+    border:1px solid rgba(242,212,136,.3); border-radius:22px; box-shadow:var(--shadow);
+    padding:28px 20px 24px; display:flex; flex-direction:column; align-items:center; gap:6px; transition:transform .08s ease; }
+  .gametile:active{ transform:translateY(1px); }
+  .gametile .tile-suits{ letter-spacing:.45em; color:var(--brass); font-size:20px; }
+  .gametile .tile-title{ font-family:var(--display); font-size:clamp(42px,12vw,66px); color:var(--brass-hi); line-height:.9;
+    text-shadow:0 2px 0 var(--brass-dim), 0 0 22px rgba(217,180,91,.3); }
+  .gametile .tile-cta{ margin-top:10px; background:linear-gradient(180deg,var(--brass-hi),var(--brass)); color:#2a1e05;
+    font-weight:700; padding:12px 24px; border-radius:12px; font-size:1.05rem; }
+  .clock{ font-weight:700; font-variant-numeric:tabular-nums; font-size:.9rem; color:var(--ink-dim); margin-left:10px; }
+  .fightsheet .big{ font-family:var(--display); color:var(--brass-hi); font-size:clamp(30px,8vw,46px); text-align:center; letter-spacing:.04em; }
+  .okcount{ text-align:center; font-size:1.15rem; color:var(--brass-hi); font-weight:800; margin:10px 0 2px; letter-spacing:.02em; }
+  .okpips{ display:flex; gap:8px; justify-content:center; margin:8px 0 14px; flex-wrap:wrap; }
+  .okpip{ padding:6px 11px; border-radius:20px; border:1px solid rgba(255,255,255,.15); font-size:.82rem; color:var(--ink-dim); }
+  .okpip.ok{ background:var(--ok); color:#04240f; border-color:var(--ok); font-weight:700; }
 </style>
-
+ 
 <div class="app" id="app"></div>
 <div id="overlay"></div>
 <div id="toast"></div>
-
+ 
 <script>/* =========================================================================
    TONGITS ENGINE  (pure, no DOM, no network)
    Standard Filipino ruleset for 2–3 players.
@@ -234,16 +257,16 @@
    ========================================================================= */
 (function (root) {
   "use strict";
-
+ 
   const RANKS = ["A","2","3","4","5","6","7","8","9","10","J","Q","K"];
   const SUITS = ["♣","♦","♥","♠"];
   const RED = new Set([1, 2]); // diamonds, hearts
-
+ 
   const rankOf = (id) => (id % 13) + 1;      // 1..13
   const suitOf = (id) => Math.floor(id / 13); // 0..3
   const isRed  = (id) => RED.has(suitOf(id));
   const label  = (id) => RANKS[rankOf(id) - 1] + SUITS[suitOf(id)];
-
+ 
   // Point value: A=1, 2..10 face, J/Q/K = 10
   function cardValue(id) {
     const r = rankOf(id);
@@ -252,13 +275,13 @@
   function handPoints(ids) {
     return ids.reduce((s, id) => s + cardValue(id), 0);
   }
-
+ 
   function makeDeck() {
     const d = [];
     for (let i = 0; i < 52; i++) d.push(i);
     return d;
   }
-
+ 
   // Mulberry32 seeded PRNG so a room can share a deterministic shuffle if needed
   function mulberry32(a) {
     return function () {
@@ -277,9 +300,9 @@
     }
     return a;
   }
-
+ 
   /* ---------------- Meld validation ---------------- */
-
+ 
   function isSet(ids) {
     if (ids.length < 3 || ids.length > 4) return false;
     const r = rankOf(ids[0]);
@@ -287,13 +310,13 @@
     const suits = new Set(ids.map(suitOf));
     return suits.size === ids.length; // distinct suits (no duplicate cards)
   }
-
+ 
   function isConsecutive(nums) {
     const s = [...nums].sort((a, b) => a - b);
     for (let i = 1; i < s.length; i++) if (s[i] !== s[i - 1] + 1) return false;
     return true;
   }
-
+ 
   function isRun(ids) {
     if (ids.length < 3) return false;
     const suit = suitOf(ids[0]);
@@ -308,7 +331,7 @@
     }
     return false;
   }
-
+ 
   function meldType(ids) {
     if (isSet(ids)) return "set";
     if (isRun(ids)) return "run";
@@ -317,14 +340,14 @@
   function isValidMeld(ids) {
     return meldType(ids) !== null;
   }
-
+ 
   // A card can be laid off (sapaw) onto an exposed meld iff the union is still
   // a single valid meld. Works for both sets (grow to 4) and runs (extend end).
   function canSapaw(cardId, meldIds) {
     if (meldIds.includes(cardId)) return false;
     return isValidMeld(meldIds.concat(cardId));
   }
-
+ 
   // Does the hand contain any valid new meld that uses `cardId`?
   // (Used to decide if taking the top discard is legal.)
   function existsMeldWith(cardId, handIds) {
@@ -337,9 +360,9 @@
     }
     return false;
   }
-
+ 
   /* ---------------- Game lifecycle ---------------- */
-
+ 
   // players: [{id, name}]  (2 or 3)
   function newGame(players, opts) {
     opts = opts || {};
@@ -347,7 +370,7 @@
       throw new Error("Tongits needs 2 or 3 players.");
     const rng = opts.seed != null ? mulberry32(opts.seed >>> 0) : Math.random;
     const dealer = opts.dealer != null ? opts.dealer % players.length : 0;
-
+ 
     const deck = shuffle(makeDeck(), rng);
     const hands = players.map(() => []);
     let k = 0;
@@ -358,7 +381,7 @@
     }
     const stock = deck.slice(k); // remainder
     hands.forEach((h) => h.sort((a, b) => a - b));
-
+ 
     return {
       players: players.map((p, i) => ({ id: p.id, name: p.name, seat: i })),
       dealer,
@@ -377,16 +400,16 @@
       round: opts.round || 1,
     };
   }
-
+ 
   const cur = (s) => s.players[s.turn];
   const nextSeat = (s, seat) => (seat + 1) % s.players.length;
-
+ 
   function meldById(s, mid) {
     return s.melds.find((m) => m.id === mid);
   }
-
+ 
   /* ---------- Actions (all mutate a copy is caller's job; here we mutate s) --- */
-
+ 
   function draw(s, source) {
     if (s.status !== "playing") throw new Error("Round is over.");
     if (s.phase !== "draw") throw new Error("Not the draw phase.");
@@ -415,7 +438,7 @@
     }
     return s;
   }
-
+ 
   function lay(s, cardIds) {
     if (s.status !== "playing") throw new Error("Round is over.");
     if (!s.hasDrawn) throw new Error("Draw first.");
@@ -436,7 +459,7 @@
     checkGoOut(s);
     return s;
   }
-
+ 
   function sapaw(s, cardId, meldId) {
     if (s.status !== "playing") throw new Error("Round is over.");
     if (!s.hasDrawn) throw new Error("Draw first.");
@@ -454,7 +477,7 @@
     checkGoOut(s);
     return s;
   }
-
+ 
   function discard(s, cardId) {
     if (s.status !== "playing") throw new Error("Round is over.");
     if (!s.hasDrawn) throw new Error("Draw before discarding.");
@@ -475,7 +498,7 @@
     advance(s);
     return s;
   }
-
+ 
   // "Tumba" / call: only allowed at the start of your turn (draw phase),
   // and only if you already have at least one exposed meld.
   function call(s) {
@@ -485,13 +508,13 @@
       throw new Error("You need at least one meld down before you can call.");
     return endRound(s, "call", s.turn);
   }
-
+ 
   function checkGoOut(s) {
     if (s.status === "playing" && s.hands[s.turn].length === 0) {
       endRound(s, "tongits", s.turn);
     }
   }
-
+ 
   function advance(s) {
     s.pendingDiscard = null;
     let seat = nextSeat(s, s.turn);
@@ -505,7 +528,7 @@
     s.log.push(`${cur(s).name}'s turn.`);
     return s;
   }
-
+ 
   function endRound(s, reason, winnerSeat) {
     const scores = s.players.map((p, seat) => ({
       seat, name: p.name, points: handPoints(s.hands[seat]), cards: s.hands[seat].length,
@@ -543,7 +566,7 @@
     s.log.push(names[reason] || `${s.players[winner].name} wins.`);
     return s;
   }
-
+ 
   /* ---------- Convenience: what can the current seat do right now? ---------- */
   function legal(s, seat) {
     const out = { draw: false, drawDiscard: false, meld: false, sapaw: false, discard: false, call: false };
@@ -558,7 +581,7 @@
     }
     return out;
   }
-
+ 
   const API = {
     RANKS, SUITS, rankOf, suitOf, isRed, label, cardValue, handPoints,
     makeDeck, shuffle, mulberry32,
@@ -566,14 +589,14 @@
     newGame, draw, lay, sapaw, discard, call, legal, endRound,
     _internal: { advance, nextSeat },
   };
-
+ 
   if (typeof module !== "undefined" && module.exports) module.exports = API;
   root.TongitsEngine = API;
 })(typeof window !== "undefined" ? window : globalThis);
 </script>
 <script>
 /* Tongits netcore — pure room/lobby/move logic, no Firebase, no DOM.
-   The backend layer wraps these in transactions; tests drive them directly.
+   The Firebase layer wraps these in transactions; tests drive them directly.
    Every function takes/returns a plain room object so it survives JSON round-trips. */
 (function (root) {
   "use strict";
@@ -581,7 +604,7 @@
     const ALPH = "ABCDEFGHJKLMNPQRSTUVWXYZ23456789";
     const genCode = () => { let s = ""; for (let i = 0; i < 4; i++) s += ALPH[Math.floor(Math.random() * ALPH.length)]; return s; };
     const clone = (o) => JSON.parse(JSON.stringify(o));
-
+ 
     function createRoomObj(code, me) {
       return { code, hostId: me.pid, status: "lobby", updatedAt: Date.now(),
         players: [{ pid: me.pid, name: me.name, seat: 0 }], game: null };
@@ -600,6 +623,8 @@
       if (room.players.length < 2) throw new Error("Need at least 2 players.");
       const players = room.players.slice().sort((a, b) => a.seat - b.seat).map((p) => ({ id: p.pid, name: p.name }));
       room.game = E.newGame(players, { dealer: 0 });
+      room.game.turnStart = Date.now();
+      room.fight = null;
       room.status = "playing"; room.updatedAt = Date.now();
       return room;
     }
@@ -608,9 +633,12 @@
       const me = room.players.find((p) => p.pid === pid);
       if (!me) throw new Error("You are not in this game.");
       if (room.status !== "playing") throw new Error("Round is over.");
+      if (room.fight) throw new Error("Wait for the fight to be decided.");
       if (room.game.turn !== me.seat) throw new Error("It's not your turn.");
+      const before = room.game.turn;
       fn(room.game); // engine action; may throw on an illegal move
       if (room.game.status === "over") room.status = "over";
+      if (room.game.turn !== before) room.game.turnStart = Date.now();
       room.updatedAt = Date.now();
       return room;
     }
@@ -619,24 +647,82 @@
       const prevWinner = room.game.result ? room.game.result.winner : 0;
       const players = room.players.slice().sort((a, b) => a.seat - b.seat).map((p) => ({ id: p.pid, name: p.name }));
       room.game = E.newGame(players, { dealer: (prevWinner + 1) % players.length, round: (room.game.round || 1) + 1 });
+      room.game.turnStart = Date.now();
+      room.fight = null;
       room.status = "playing"; room.updatedAt = Date.now();
+      return room;
+    }
+    // ---- fight vote (Tumba/Call gated by everyone tapping OK) ----
+    function resolveFight(room) {
+      const f = room.fight; if (!f) return;
+      const g = room.game;
+      if (g && g.status === "playing" && g.turn === f.by) {
+        E.call(g);
+        if (g.status === "over") room.status = "over";
+      }
+      room.fight = null;
+      room.updatedAt = Date.now();
+    }
+    function startFightObj(room, seat) {
+      if (!room || room.status !== "playing" || !room.game) throw new Error("No game in progress.");
+      if (room.fight) throw new Error("A fight is already being decided.");
+      const g = room.game;
+      if (g.turn !== seat) throw new Error("You can only fight on your turn.");
+      if (g.phase !== "draw") throw new Error("Fight at the start of your turn, before you draw.");
+      if (!g.melds.some((m) => m.owner === seat)) throw new Error("You need a meld down before you can fight.");
+      const oks = [seat];
+      room.players.forEach((p) => { if (p.bot && !oks.includes(p.seat)) oks.push(p.seat); });
+      room.fight = { by: seat, oks };
+      if (oks.length >= room.players.length) resolveFight(room);
+      room.updatedAt = Date.now();
+      return room;
+    }
+    function fightOkObj(room, seat) {
+      if (!room || !room.fight) return room;
+      if (!room.fight.oks.includes(seat)) room.fight.oks.push(seat);
+      if (room.fight.oks.length >= room.players.length) resolveFight(room);
+      room.updatedAt = Date.now();
+      return room;
+    }
+    function cancelFightObj(room, seat) {
+      if (!room || !room.fight) return room;
+      if (room.fight.by === seat) room.fight = null;
+      room.updatedAt = Date.now();
       return room;
     }
     function leaveRoomObj(room, pid) {
       if (!room) return null;
       if (room.status === "lobby") {
         room.players = room.players.filter((p) => p.pid !== pid).map((p, i) => ({ ...p, seat: i }));
-        if (room.players.every((p) => p.bot)) return null;
+        if (room.players.every((p) => p.bot)) return null; // no humans left → close room
         if (room.players.length === 0) return null;
-        if (!room.players.some((p) => p.pid === room.hostId)) { const fh = room.players.find((p)=>!p.bot)||room.players[0]; room.hostId = fh.pid; }
+        if (!room.players.some((p) => p.pid === room.hostId)) {
+          const firstHuman = room.players.find((p) => !p.bot) || room.players[0];
+          room.hostId = firstHuman.pid;
+        }
         room.updatedAt = Date.now();
       }
-      return room;
+      return room; // mid-game: player stays listed so the round state is preserved
     }
     const BOT_NAMES = ["Bot Rey", "Bot Nena", "Bot Lito"];
-    function addBotObj(room){ if(!room) throw new Error("Room is gone."); if(room.status!=="lobby") throw new Error("The game already started."); if(room.players.length>=3) throw new Error("The room is full (max 3)."); const n=room.players.filter((p)=>p.bot).length; room.players.push({ pid:"bot_"+n+"_"+room.players.length, name:BOT_NAMES[n%BOT_NAMES.length], seat:room.players.length, bot:true }); room.updatedAt=Date.now(); return room; }
-    function removeBotObj(room){ if(!room) throw new Error("Room is gone."); if(room.status!=="lobby") throw new Error("The game already started."); for(let i=room.players.length-1;i>=0;i--){ if(room.players[i].bot){ room.players.splice(i,1); break; } } room.players=room.players.map((p,i)=>({ ...p, seat:i })); room.updatedAt=Date.now(); return room; }
-    return { genCode, clone, createRoomObj, joinRoomObj, startGameObj, applyMoveObj, nextRoundObj, leaveRoomObj, addBotObj, removeBotObj };
+    function addBotObj(room) {
+      if (!room) throw new Error("Room is gone.");
+      if (room.status !== "lobby") throw new Error("The game already started.");
+      if (room.players.length >= 3) throw new Error("The room is full (max 3).");
+      const n = room.players.filter((p) => p.bot).length;
+      room.players.push({ pid: "bot_" + n + "_" + room.players.length, name: BOT_NAMES[n % BOT_NAMES.length], seat: room.players.length, bot: true });
+      room.updatedAt = Date.now();
+      return room;
+    }
+    function removeBotObj(room) {
+      if (!room) throw new Error("Room is gone.");
+      if (room.status !== "lobby") throw new Error("The game already started.");
+      for (let i = room.players.length - 1; i >= 0; i--) if (room.players[i].bot) { room.players.splice(i, 1); break; }
+      room.players = room.players.map((p, i) => ({ ...p, seat: i }));
+      room.updatedAt = Date.now();
+      return room;
+    }
+    return { genCode, clone, createRoomObj, joinRoomObj, startGameObj, applyMoveObj, nextRoundObj, leaveRoomObj, addBotObj, removeBotObj, startFightObj, fightOkObj, cancelFightObj };
   }
   if (typeof module !== "undefined" && module.exports) module.exports = makeNet;
   if (typeof window !== "undefined") root.TongitsNet = makeNet;
@@ -644,14 +730,14 @@
 </script>
 <script>
 /* Tongits bot AI — pure, deterministic, plays one full turn via the engine.
-   Deterministic (no RNG) so it's safe to run inside a backend transaction that
+   Deterministic (no RNG) so it's safe to run inside a Firebase transaction that
    may re-execute. Strategy is greedy: meld everything it can, lay off spare cards,
    dump the least-useful high card, and occasionally "call" when its hand is tiny. */
 (function (root) {
   "use strict";
   function makeBot(E) {
     const val = E.cardValue, rank = E.rankOf, suit = E.suitOf;
-
+ 
     // ---- generate candidate melds present in a hand ----
     function candidateMelds(hand) {
       const out = [];
@@ -688,7 +774,7 @@
       return out.filter((m) => E.isValidMeld(m));
     }
     const meldPoints = (ids) => ids.reduce((s, id) => s + val(id), 0);
-
+ 
     // best single meld to lay right now (most points removed, then most cards)
     function bestMeld(hand) {
       const c = candidateMelds(hand);
@@ -716,7 +802,7 @@
         }
       return best;
     }
-
+ 
     function layAll(g, seat) {
       let m;
       while (g.status === "playing" && (m = bestMeld(g.hands[seat]))) E.lay(g, m);
@@ -731,7 +817,7 @@
         }
       }
     }
-
+ 
     // choose which card to throw: least meld-potential, break ties by highest points
     function chooseDiscard(g, seat) {
       const hand = g.hands[seat].filter((c) => c !== g.pendingDiscard);
@@ -749,19 +835,20 @@
       }
       return pick;
     }
-
+ 
     // play one full turn for `seat`, mutating g via the engine.
-    // Handles both entry phases: the dealer's first turn starts pre-drawn (meld phase).
-    function takeTurn(g, seat) {
+    // opts.noCall = never initiate a call (used for timeout auto-moves & bots here).
+    function takeTurn(g, seat, opts) {
+      opts = opts || {};
       if (g.status !== "playing" || g.turn !== seat) return;
       if (g.phase === "draw") {
         const L = E.legal(g, seat);
         // conservative call: tiny deadwood and at least one meld down
-        if (L.call && E.handPoints(g.hands[seat]) <= 5) { E.call(g); return; }
+        if (!opts.noCall && L.call && E.handPoints(g.hands[seat]) <= 5) { E.call(g); return; }
         // draw: take the discard when it completes a meld, else from stock
         if (L.drawDiscard) E.draw(g, "discard");
         else if (L.draw) E.draw(g, "stock");
-        else if (L.call) { E.call(g); return; } // stock empty & can't take → call if possible
+        else if (!opts.noCall && L.call) { E.call(g); return; } // stock empty & can't take → call if allowed
         else return;
       }
       if (g.status !== "playing") return;
@@ -777,7 +864,7 @@
       // discard to end the turn
       E.discard(g, chooseDiscard(g, seat));
     }
-
+ 
     return { takeTurn, candidateMelds, bestMeld, chooseDiscard };
   }
   if (typeof module !== "undefined" && module.exports) module.exports = makeBot;
@@ -792,8 +879,8 @@
        * anon public key -> supabaseKey   (the long "anon"/"public" key; safe to ship)
      Run the SQL in SETUP-SUPABASE.md ONCE to create the table, policies & realtime.
      ============================================================================ */
-  const supabaseUrl = "https://wgpzkdbvbpacjwxtlnuf.supabase.co";
-  const supabaseKey = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6IndncHprZGJ2YnBhY2p3eHRsbnVmIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODQ2NDIzMDAsImV4cCI6MjEwMDIxODMwMH0.-619fycUSQsv9D95aMJRuIKHN7-SlyJkcvlyexA6F1g";
+  const supabaseUrl = "PASTE_ME";
+  const supabaseKey = "PASTE_ME";
   /* ========================================================================== */
   const configured = supabaseUrl && supabaseKey && !/PASTE_ME/.test(supabaseUrl + supabaseKey);
   if(!configured){
@@ -865,7 +952,7 @@ const E = window.TongitsEngine;
 const $app = document.getElementById('app');
 const $ov  = document.getElementById('overlay');
 const $toastEl = document.getElementById('toast');
-
+ 
 /* ---------------- transport: Supabase (Realtime + Postgres) ---------------- */
 const NET = window.TongitsNet(E);            // pure room/lobby/move logic (shared with tests)
 const BOT = window.TongitsBot(E);            // bot AI
@@ -891,7 +978,7 @@ function onRoomUpdate(room){
 function maybeRunOnlineBot(){
   if(S.mode!=='online' || !S.room || !window.FB || !window.FB.ready) return;
   const room=S.room;
-  if(room.hostId!==S.me.pid || room.status!=='playing' || !room.game) return;
+  if(room.hostId!==S.me.pid || room.status!=='playing' || !room.game || room.fight) return;
   const seat=room.game.turn;
   const p=room.players.find(x=>x.seat===seat);
   if(!p || !p.bot) return;
@@ -903,10 +990,11 @@ function maybeRunOnlineBot(){
   S.botTimer=setTimeout(async ()=>{
     try{
       await window.FB.transaction(room.code, r=>{
-        if(!r || r.status!=='playing' || !r.game) return;
+        if(!r || r.status!=='playing' || !r.game || r.fight) return;
         if(r.game.turn!==seat) return;
         const pp=r.players.find(x=>x.seat===seat); if(!pp || !pp.bot) return;
-        BOT.takeTurn(r.game, seat);
+        BOT.takeTurn(r.game, seat, {noCall:true});
+        r.game.turnStart=Date.now();
         if(r.game.status==='over') r.status='over';
         return r;
       });
@@ -917,21 +1005,43 @@ function maybeRunOnlineBot(){
 async function addBot(){ await window.FB.transaction(S.room.code, room=>{ if(!room||room.hostId!==S.me.pid) return; return NET.addBotObj(room); }); }
 async function removeBot(){ await window.FB.transaction(S.room.code, room=>{ if(!room||room.hostId!==S.me.pid) return; return NET.removeBotObj(room); }); }
 function enterRoom(code){ S.mode='online'; S.screen='lobby'; S.selection=[]; $ov.innerHTML=''; lset('tongits:last',{code, name:S.me.name}); subscribe(code); }
-
+ 
 /* ---------------- app state ---------------- */
 const S = {
-  screen:'home', mode:null,
+  screen:'landing', mode:null,
   me:{ pid:null, name:'' },
   room:null, seat:null,
   local:null,
   selection:[], curtain:null, busy:false, unsub:null, watchCode:null, botTimer:null, botToken:null,
+  timerInt:null, clockKey:null, clockWarned:false, clockExpired:false, fightShown:null,
 };
-
+ 
 function genPid(){ return 'p'+Math.random().toString(36).slice(2,10)+Date.now().toString(36).slice(-4); }
 function genCode(){ const a='ABCDEFGHJKLMNPQRSTUVWXYZ23456789'; let s=''; for(let i=0;i<4;i++) s+=a[Math.floor(Math.random()*a.length)]; return s; }
 function toast(msg){ $toastEl.innerHTML=`<div class="toast">${esc(msg)}</div>`; clearTimeout(toast._t); toast._t=setTimeout(()=>$toastEl.innerHTML='',2600); }
 function esc(s){ return String(s).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c])); }
-
+ 
+/* ---------------- sound (Web Audio; no files needed) ---------------- */
+const Sound = (function(){
+  let ctx=null;
+  function ac(){ try{ if(!ctx) ctx=new (window.AudioContext||window.webkitAudioContext)(); }catch(e){ ctx=null; } return ctx; }
+  function resume(){ const c=ac(); if(c && c.state==='suspended'){ try{ c.resume(); }catch(e){} } }
+  function beep(freq,start,dur,type,gain){ const c=ac(); if(!c) return; try{
+    const t=c.currentTime+start, o=c.createOscillator(), g=c.createGain();
+    o.type=type||'sine'; o.frequency.value=freq; o.connect(g); g.connect(c.destination);
+    g.gain.setValueAtTime(0.0001,t); g.gain.exponentialRampToValueAtTime(gain||0.2,t+0.02);
+    g.gain.exponentialRampToValueAtTime(0.0001,t+dur); o.start(t); o.stop(t+dur+0.03);
+  }catch(e){} }
+  return {
+    resume,
+    turn(){ resume(); beep(659,0,0.15,'sine',0.25); beep(988,0.13,0.22,'sine',0.22); },
+    warn(){ resume(); beep(440,0,0.13,'square',0.18); beep(440,0.2,0.16,'square',0.18); },
+    fight(){ resume(); beep(330,0,0.18,'sawtooth',0.2); beep(494,0.16,0.30,'sawtooth',0.2); },
+    ok(){ resume(); beep(880,0,0.08,'sine',0.14); },
+  };
+})();
+document.addEventListener('pointerdown', ()=>Sound.resume(), {passive:true});
+ 
 /* ---------------- card rendering ---------------- */
 function cardHTML(id, cls){
   const r = E.RANKS[E.rankOf(id)-1], s = E.SUITS[E.suitOf(id)], red = E.isRed(id);
@@ -940,19 +1050,38 @@ function cardHTML(id, cls){
     <div class="pip">${s}</div>
     <div class="c-br"><span class="c-r">${r}</span><span class="c-s">${s}</span></div></div>`;
 }
-
+ 
 /* ============================================================ RENDER ROOT */
 function render(){
   if(S.curtain){ renderCurtain(); return; } else { document.getElementById('curtain')?.remove(); }
+  if(S.screen==='landing') return renderLanding();
   if(S.screen==='home')  return renderHome();
   if(S.screen==='lobby') return renderLobby();
-  if(S.screen==='game')  return renderTable();
+  if(S.screen==='game')  { renderTable(); maybeRenderFight(); return; }
 }
-
+ 
+/* ---------------- LANDING (Games ni Bumbay) ---------------- */
+function renderLanding(){
+  $ov.innerHTML='';
+  $app.innerHTML = `
+  <div class="sitehead">Games ni Bumbay</div>
+  <div class="landing">
+    <button class="gametile" id="play-tongits">
+      <div class="tile-suits">♠ ♥ ♦ ♣</div>
+      <div class="tile-title">TONGITS</div>
+      <div class="tile-cta">Play Tongits</div>
+    </button>
+    <p class="muted center" style="max-width:320px">Filipino card game on green felt — with friends online, solo vs bots, or pass &amp; play.</p>
+  </div>`;
+  document.getElementById('play-tongits').onclick=()=>{ Sound.resume(); S.screen='home'; render(); };
+}
+ 
 /* ---------------- HOME ---------------- */
 function renderHome(){
   $ov.innerHTML='';
   $app.innerHTML = `
+  <div class="topbar"><button class="btn ghost sm" id="to-landing">‹ Back</button>
+    <span class="brandsm" style="margin:0 auto">Games ni Bumbay</span><span style="width:56px"></span></div>
   <div class="marquee"><div class="word">TONGITS</div>
     <div class="suits"><span>♠</span><span class="r">♥</span><span class="r">♦</span><span>♣</span></div></div>
   <p class="tagline">The Filipino card game — dealt on green felt.</p>
@@ -973,9 +1102,10 @@ function renderHome(){
   document.getElementById('b-online').onclick=()=>{ if(!ensureName())return; showOnlineMenu(); };
   document.getElementById('b-local').onclick =()=>{ if(!ensureName())return; showLocalSetup(); };
   document.getElementById('b-rules').onclick =()=> showRules();
+  document.getElementById('to-landing').onclick =()=>{ S.screen='landing'; render(); };
 }
 function ensureName(){ const n=(S.me.name||'').trim(); if(!n){ toast('Enter your name first.'); document.getElementById('nm')?.focus(); return false;} S.me.name=n; return true; }
-
+ 
 /* ---------------- ONLINE: create/join menu ---------------- */
 function showOnlineMenu(){
   $ov.innerHTML = `<div class="overlay"><div class="sheet">
@@ -994,7 +1124,7 @@ function showOnlineMenu(){
   document.getElementById('o-join').onclick=()=>{ const c=(document.getElementById('jc').value||'').toUpperCase().trim(); if(c.length!==4){toast('Codes are 4 letters.');return;} joinRoom(c); };
   document.getElementById('o-cancel').onclick=()=>{ $ov.innerHTML=''; };
 }
-
+ 
 async function createRoom(){
   if(!netReady()){ toast('Add your Supabase URL + key to enable online play.'); return; }
   if(S.busy)return; S.busy=true;
@@ -1004,7 +1134,7 @@ async function createRoom(){
   if(!made){ toast('Could not create a room — check your connection.'); return; }
   enterRoom(code);
 }
-
+ 
 async function joinRoom(code){
   if(!netReady()){ toast('Add your Supabase URL + key to enable online play.'); return; }
   if(S.busy)return; S.busy=true; window.__lastTxErr=null;
@@ -1016,9 +1146,9 @@ async function joinRoom(code){
   if(!inRoom){ toast((window.__lastTxErr && window.__lastTxErr.message) || ('Could not join '+code+'.')); window.__lastTxErr=null; return; }
   enterRoom(code);
 }
-
+ 
 function mySeat(){ if(S.mode!=='online'||!S.room) return null; const p=S.room.players.find(p=>p.pid===S.me.pid); return p?p.seat:null; }
-
+ 
 /* ---------------- LOBBY ---------------- */
 function renderLobby(){
   $ov.innerHTML='';
@@ -1056,23 +1186,23 @@ function renderLobby(){
     if(ab) ab.onclick=addBot; if(rb) rb.onclick=removeBot;
   }
 }
-
+ 
 async function startOnlineGame(){
   window.__lastTxErr=null;
   const res=await window.FB.transaction(S.room.code, room=>{ if(!room||room.hostId!==S.me.pid) return; return NET.startGameObj(room); });
   if(!res.committed){ toast((window.__lastTxErr&&window.__lastTxErr.message)||'Could not start the game.'); window.__lastTxErr=null; }
   // the live subscription flips everyone (including us) to the table
 }
-
+ 
 async function leaveRoom(){
   const code=S.room&&S.room.code;
   teardownOnline();
   if(code){ try{ await window.FB.transaction(code, room=> NET.leaveRoomObj(room, S.me.pid)); }catch(e){} }
   S.room=null; S.mode=null; S.seat=null; S.screen='home'; render();
 }
-
+ 
 /* online sync is push-based via window.FB.watch → onRoomUpdate (see transport, above) */
-
+ 
 /* ---------------- LOCAL (pass & play, with optional bots) ---------------- */
 const LOCAL_PRESETS = [
   { label:'You vs 2 bots',     humans:1, bots:2 },
@@ -1128,28 +1258,39 @@ function isBotSeat(seat){
 }
 function localKickoff(){
   const g=S.local.game;
+  g.turnStart=Date.now();
   if(g.status!=='playing'){ render(); return; }
   if(isBotSeat(g.turn)){ render(); scheduleLocalBot(); }
   else { S.local.viewer=g.turn; render(); }
+}
+/* one place that decides what happens after a local turn advances */
+function localAdvance(before){
+  const g=S.local.game;
+  if(g.status!=='playing'){ render(); return; }
+  if(g.turn!==before){
+    g.turnStart=Date.now();
+    if(isBotSeat(g.turn)){ render(); scheduleLocalBot(); return; }
+    if(localHumanSeats().length>=2){ S.curtain={ name:g.players[g.turn].name, seat:g.turn }; render(); return; }
+    S.local.viewer=g.turn; render(); return;
+  }
+  render();
 }
 function scheduleLocalBot(){
   clearTimeout(S.botTimer);
   S.botTimer=setTimeout(()=>{
     const g=S.local&&S.local.game;
-    if(!g || S.mode!=='local' || g.status!=='playing' || !isBotSeat(g.turn)){ return; }
-    try{ BOT.takeTurn(g, g.turn); }catch(e){}
-    if(g.status!=='playing'){ render(); return; }
-    if(isBotSeat(g.turn)){ render(); scheduleLocalBot(); return; }
-    if(localHumanSeats().length>=2){ S.curtain={ name:g.players[g.turn].name, seat:g.turn }; render(); return; }
-    S.local.viewer=g.turn; render();
+    if(!g || S.mode!=='local' || g.status!=='playing' || S.local.fight || !isBotSeat(g.turn)){ return; }
+    const before=g.turn;
+    try{ BOT.takeTurn(g, g.turn, {noCall:true}); }catch(e){}
+    localAdvance(before);
   }, 750);
 }
-
+ 
 /* which game object + view perspective are we showing? */
 function G(){ return S.mode==='online' ? (S.room&&S.room.game) : (S.local&&S.local.game); }
 function viewSeat(){ return S.mode==='online' ? mySeat() : (S.local?S.local.viewer:0); }
-function canAct(){ const g=G(); if(!g) return false; if(isBotSeat(g.turn)) return false; return S.mode==='online' ? g.turn===mySeat() : g.turn===S.local.viewer; }
-
+function canAct(){ const g=G(); if(!g) return false; if(getFight()) return false; if(isBotSeat(g.turn)) return false; return S.mode==='online' ? g.turn===mySeat() : g.turn===S.local.viewer; }
+ 
 /* ---------------- TABLE ---------------- */
 function renderTable(){
   $ov.innerHTML='';
@@ -1157,12 +1298,12 @@ function renderTable(){
   if(g.status==='over'){ renderTable_board(g); showRoundOver(g); return; }
   renderTable_board(g);
 }
-
+ 
 function renderTable_board(g){
   const vs=viewSeat(), me=vs, act=canAct();
   const L = act ? E.legal(g, me) : {draw:false,drawDiscard:false,meld:false,sapaw:false,discard:false,call:false};
   const sel=S.selection.slice();
-
+ 
   // opponents (everyone except me), in seat order starting after me
   const opp=[];
   for(let k=1;k<g.players.length;k++){ opp.push((me+k)%g.players.length); }
@@ -1174,14 +1315,14 @@ function renderTable_board(g){
       <div class="meta">${cnt} cards${g.melds.some(m=>m.owner===si)?' · has melds':''}</div>
       <div class="backrow">${backs}</div></div>`;
   }).join('');
-
+ 
   // stock + discard
   const top = g.discard.length? g.discard[g.discard.length-1] : null;
   const discardHTML = top
     ? cardHTML(top, 'disc'+(L.drawDiscard?' takeable':''))
     : `<div class="discardslot">empty</div>`;
   const stockHTML = `<div class="stockchip cb" data-n="${g.stock.length}"></div>`;
-
+ 
   // melds band (armable if exactly one selected card can sapaw)
   const armCard = (act && L.sapaw && sel.length===1) ? sel[0] : null;
   const meldsByOwner={};
@@ -1196,12 +1337,12 @@ function renderTable_board(g){
     meldsHTML+=`<div class="meldgroup"><div class="who">${esc(g.players[owner].name)}${(+owner)===me?' (you)':''}</div>${rows}</div>`;
   });
   if(!meldsHTML) meldsHTML=`<div class="muted" style="margin:auto">No melds on the table yet.</div>`;
-
+ 
   // your hand
   const hand=g.hands[me].slice();
   const handHTML=hand.map(id=>cardHTML(id, sel.includes(id)?'sel':'')).join('');
   const myPts=E.handPoints(hand);
-
+ 
   // hint + actions
   let hint='';
   if(!act && isBotSeat(g.turn)) hint=`🤖 ${esc(g.players[g.turn].name)} is playing…`;
@@ -1211,17 +1352,17 @@ function renderTable_board(g){
   else if(sel.length===1) hint='Tap a glowing meld to lay this card off, or pick more cards to meld / discard.';
   else if(sel.length>=3) hint = E.isValidMeld(sel)?'Valid meld — tap “Meld”.':'Pick a set (same rank) or run (same suit in sequence).';
   else hint='Pick cards to meld, or one card to discard.';
-
+ 
   const canMeld = act && g.phase==='meld' && sel.length>=3 && E.isValidMeld(sel);
   const canDiscard = act && L.discard && sel.length===1 && !(g.pendingDiscard!=null && sel[0]===g.pendingDiscard);
-
+ 
   const actions = g.phase==='draw'
     ? `<button class="btn sm primary" id="a-draw" ${L.draw?'':'disabled'}>Draw stock</button>
        <button class="btn sm" id="a-take" ${L.drawDiscard?'':'disabled'}>Take discard</button>
        <button class="btn sm ghost" id="a-call" ${L.call?'':'disabled'}>Call</button>`
     : `<button class="btn sm primary" id="a-meld" ${canMeld?'':'disabled'}>Meld</button>
        <button class="btn sm" id="a-discard" ${canDiscard?'':'disabled'}>Discard</button>`;
-
+ 
   $app.innerHTML=`
   <div class="topbar"><span class="brandsm">TONGITS</span>
     <div class="rt">
@@ -1239,16 +1380,16 @@ function renderTable_board(g){
       <div class="logline">${esc(g.log[g.log.length-1]||'')}</div>
       <div class="hint">${hint}</div>
       <div class="youbar"><span class="yn">${esc(g.players[me].name)} ${g.turn===me?'<span class="badge" style="background:var(--brass-hi);color:#2a1e05;padding:1px 7px;border-radius:20px;font-size:.7rem">your turn</span>':''}</span>
-        <span class="pts">hand: ${g.hands[me].length} cards · ${myPts} pts</span></div>
+        <span class="pts">hand: ${g.hands[me].length} cards · ${myPts} pts</span><span class="clock" id="turnclock"></span></div>
       <div class="hand" id="hand">${handHTML}</div>
       <div class="actions">${actions}</div>
     </div>
   </div>`;
-
+ 
   // ---- bind ----
   document.getElementById('t-rules').onclick=showRules;
   document.getElementById('t-leave').onclick=()=>{ if(S.mode==='online')leaveRoom(); else { S.local=null;S.mode=null;S.screen='home';render(); } };
-
+ 
   if(act){
     // hand selection
     document.querySelectorAll('#hand .card').forEach(el=>{
@@ -1267,12 +1408,12 @@ function renderTable_board(g){
     const bind=(id,fn)=>{ const b=document.getElementById(id); if(b) b.onclick=fn; };
     bind('a-draw',()=>doAction(gg=>E.draw(gg,'stock')));
     bind('a-take',()=>doAction(gg=>E.draw(gg,'discard')));
-    bind('a-call',()=>{ confirmCall(); });
+    bind('a-call',()=>{ startFight(); });
     bind('a-meld',()=>{ if(canMeld) doAction(gg=>E.lay(gg, S.selection.slice())); });
     bind('a-discard',()=>{ if(canDiscard) doAction(gg=>E.discard(gg, S.selection[0])); });
   }
 }
-
+ 
 function confirmCall(){
   $ov.innerHTML=`<div class="overlay"><div class="sheet">
     <h2>Call?</h2>
@@ -1283,10 +1424,11 @@ function confirmCall(){
   document.getElementById('c-no').onclick=()=>{$ov.innerHTML='';};
   document.getElementById('c-yes').onclick=()=>{ $ov.innerHTML=''; doAction(gg=>E.call(gg)); };
 }
-
+ 
 /* apply an engine action for either mode, then sync/re-render */
 async function doAction(fn){
   const g=G(); if(!g) return;
+  if(getFight()){ toast('Waiting for everyone to OK the fight…'); return; }
   if(S.mode==='online'){
     if(S.busy) return;
     const room=S.room;
@@ -1304,16 +1446,122 @@ async function doAction(fn){
     const before=g.turn;
     try{ fn(g); }catch(err){ toast(err.message); return; }
     S.selection=[];
-    if(g.status!=='playing'){ render(); return; }
-    if(g.turn!==before){
-      if(isBotSeat(g.turn)){ render(); scheduleLocalBot(); return; }
-      if(localHumanSeats().length>=2){ S.curtain={ name:g.players[g.turn].name, seat:g.turn }; render(); return; }
-      S.local.viewer=g.turn; render(); return;
-    }
-    render();
+    localAdvance(before);
   }
 }
-
+ 
+/* ---------------- FIGHT vote (call gated by everyone tapping OK) ---------------- */
+function getFight(){ return S.mode==='online' ? (S.room&&S.room.fight) : (S.local&&S.local.fight); }
+function startFight(){
+  const g=G(); if(!g) return;
+  const seat = S.mode==='online' ? mySeat() : g.turn;
+  if(g.turn!==seat){ toast('You can only fight on your turn.'); return; }
+  if(g.phase!=='draw'){ toast('Fight at the start of your turn, before you draw.'); return; }
+  if(!g.melds.some(m=>m.owner===seat)){ toast('You need a meld down before you can fight.'); return; }
+  Sound.fight();
+  if(S.mode==='online'){
+    window.__lastTxErr=null;
+    window.FB.transaction(S.room.code, r=> NET.startFightObj(r, seat))
+      .then(res=>{ if(res && !res.committed){ toast((window.__lastTxErr&&window.__lastTxErr.message)||'Could not start the fight.'); window.__lastTxErr=null; } })
+      .catch(()=>{});
+  } else {
+    const oks=[seat]; S.local.players.forEach(p=>{ if(p.bot && !oks.includes(p.seat)) oks.push(p.seat); });
+    S.local.fight={ by:seat, oks };
+    if(S.local.fight.oks.length>=S.local.players.length) resolveLocalFight(); else render();
+  }
+}
+function fightOk(){
+  if(S.mode==='online'){ window.FB.transaction(S.room.code, r=> NET.fightOkObj(r, mySeat())).catch(()=>{}); }
+  else { const f=S.local.fight; if(!f) return;
+    const next=localHumanSeats().find(s=>!f.oks.includes(s));
+    if(next!=null) f.oks.push(next);
+    if(f.oks.length>=S.local.players.length) resolveLocalFight(); else render();
+  }
+}
+function cancelFight(){
+  if(S.mode==='online'){ window.FB.transaction(S.room.code, r=> NET.cancelFightObj(r, mySeat())).catch(()=>{}); }
+  else { S.local.fight=null; render(); }
+}
+function resolveLocalFight(){
+  const f=S.local.fight, g=S.local.game;
+  if(g.status==='playing' && g.turn===f.by){ try{ E.call(g); }catch(e){} }
+  S.local.fight=null; render();
+}
+function maybeRenderFight(){
+  const f=getFight();
+  if(!f){ if(S.fightShown) S.fightShown=null; return; }
+  const g=G(); if(!g) return;
+  const key=(S.mode==='online'?S.room.code:'L')+'#'+f.by+'#'+(g.round||1);
+  if(S.fightShown!==key){ S.fightShown=key; Sound.fight(); }
+  const players=(S.mode==='online'?S.room.players:S.local.players);
+  const N=players.length;
+  const byName=g.players[f.by].name;
+  const pips=players.slice().sort((a,b)=>a.seat-b.seat).map(p=>{
+    const done=f.oks.includes(p.seat);
+    return `<span class="okpip ${done?'ok':''}">${p.bot?'🤖 ':''}${esc(g.players[p.seat].name)}${done?' ✓':''}</span>`;
+  }).join('');
+  let okBtn='';
+  if(S.mode==='online'){
+    const iOkd=f.oks.includes(mySeat());
+    okBtn = iOkd ? `<button class="btn" disabled>You're ready ✓</button>`
+                 : `<button class="btn primary" id="f-ok">OK — let the fight go on</button>`;
+  } else {
+    const remaining=localHumanSeats().filter(s=>!f.oks.includes(s));
+    okBtn = remaining.length ? `<button class="btn primary" id="f-ok">OK — ${esc(g.players[remaining[0]].name)}</button>` : '';
+  }
+  const canCancel = (S.mode==='online' ? f.by===mySeat() : true);
+  $ov.innerHTML=`<div class="overlay"><div class="sheet fightsheet">
+    <div class="big">🔥 FIGHT!</div>
+    <p class="muted center">${esc(byName)} wants to fight (call). Everyone taps OK, then hands are compared — lowest total wins.</p>
+    <div class="okcount">${f.oks.length}/${N} pressed OK</div>
+    <div class="okpips">${pips}</div>
+    ${okBtn}
+    ${canCancel?`<button class="btn ghost sm" id="f-cancel" style="width:100%;margin-top:8px">Cancel fight</button>`:''}
+  </div></div>`;
+  const okb=document.getElementById('f-ok'); if(okb) okb.onclick=()=>{ Sound.ok(); fightOk(); };
+  const cxb=document.getElementById('f-cancel'); if(cxb) cxb.onclick=cancelFight;
+}
+ 
+/* ---------------- turn timer + sounds ---------------- */
+function tickTimer(){
+  const el=document.getElementById('turnclock');
+  const g=G();
+  if(!g || S.screen!=='game' || S.curtain || g.status!=='playing' || getFight()){ if(el) el.textContent=''; return; }
+  const key=(S.mode==='online'?S.room.code:'L')+'#'+(g.turnStart||0)+'#'+g.turn+'#'+(g.round||1);
+  if(key!==S.clockKey){ S.clockKey=key; S.clockWarned=false; S.clockExpired=false;
+    if(canAct() && !isBotSeat(g.turn)) Sound.turn();
+  }
+  const rem = g.turnStart ? Math.max(0, 30-(Date.now()-g.turnStart)/1000) : 30;
+  if(el){ el.textContent='⏱ '+Math.ceil(rem)+'s'; el.style.color = rem<=10 ? 'var(--bad)' : 'var(--ink-dim)'; }
+  const mine = canAct() && !isBotSeat(g.turn);
+  if(mine && rem<=10 && !S.clockWarned){ S.clockWarned=true; Sound.warn(); }
+  if(!S.clockExpired){
+    if(mine && rem<=0){ S.clockExpired=true; timeoutMove(); }
+    else if(S.mode==='online' && S.room && S.room.hostId===S.me.pid && !isBotSeat(g.turn)){
+      const past=(Date.now()-(g.turnStart||Date.now()))/1000 - 30;
+      if(past>=3){ S.clockExpired=true; timeoutMove(g.turn); }
+    }
+  }
+}
+function timeoutMove(seat){
+  const g=G(); if(!g) return;
+  if(S.mode==='online'){
+    const s = seat!=null?seat:mySeat();
+    window.FB.transaction(S.room.code, r=>{
+      if(!r||r.status!=='playing'||r.fight||!r.game) return;
+      if(r.game.turn!==s) return;
+      BOT.takeTurn(r.game, s, {noCall:true});
+      r.game.turnStart=Date.now();
+      if(r.game.status==='over') r.status='over';
+      return r;
+    }).catch(()=>{});
+  } else {
+    const before=g.turn;
+    try{ BOT.takeTurn(g, g.turn, {noCall:true}); }catch(e){}
+    S.selection=[]; localAdvance(before);
+  }
+}
+ 
 /* ---------------- CURTAIN (local pass-device) ---------------- */
 function renderCurtain(){
   $ov.innerHTML='';
@@ -1323,9 +1571,9 @@ function renderCurtain(){
     <div class="who">${esc(S.curtain.name)}</div>
     <p class="muted">Pass the device. Others, look away!</p>
     <button class="btn primary" id="cx" style="width:auto;padding:14px 26px">I’m ${esc(S.curtain.name)} — show my hand</button>`;
-  document.getElementById('cx').onclick=()=>{ if(S.curtain&&S.curtain.seat!=null&&S.local) S.local.viewer=S.curtain.seat; S.curtain=null; render(); };
+  document.getElementById('cx').onclick=()=>{ if(S.curtain&&S.curtain.seat!=null&&S.local){ S.local.viewer=S.curtain.seat; if(S.local.game) S.local.game.turnStart=Date.now(); } S.curtain=null; render(); };
 }
-
+ 
 /* ---------------- ROUND OVER ---------------- */
 function showRoundOver(g){
   const res=g.result;
@@ -1347,7 +1595,7 @@ function showRoundOver(g){
   const again=document.getElementById('again'); if(again) again.onclick=()=>nextRound(g);
   document.getElementById('tomenu').onclick=()=>{ if(S.mode==='online')leaveRoom(); else{ S.local=null;S.mode=null;S.screen='home';render(); } };
 }
-
+ 
 async function nextRound(g){
   const prevWinner=g.result.winner;
   if(S.mode==='online'){
@@ -1362,7 +1610,7 @@ async function nextRound(g){
     S.selection=[]; $ov.innerHTML=''; localKickoff();
   }
 }
-
+ 
 /* ---------------- RULES ---------------- */
 function showRules(){
   $ov.innerHTML=`<div class="overlay"><div class="sheet">
@@ -1384,12 +1632,12 @@ function showRules(){
   </div></div>`;
   document.getElementById('r-close').onclick=()=>{ $ov.innerHTML=''; };
 }
-
+ 
 /* ---------------- test hook (only active when a test sets the flag) -------- */
 if (window.__TONGITS_TEST__) {
-  window.__tongits = { get S(){return S;}, G, mySeat, render, onRoomUpdate, maybeRunOnlineBot, isBotSeat, NET, BOT };
+  window.__tongits = { get S(){return S;}, G, mySeat, render, onRoomUpdate, maybeRunOnlineBot, isBotSeat, getFight, startFight, fightOk, tickTimer, timeoutMove, NET, BOT };
 }
-
+ 
 /* ---------------- boot ---------------- */
 (function boot(){
   let pid = lget('tongits:pid');
@@ -1398,6 +1646,9 @@ if (window.__TONGITS_TEST__) {
   const last = lget('tongits:last');
   if(last && last.name) S.me.name=last.name;
   render();
+  if(!S.timerInt) S.timerInt=setInterval(tickTimer, 250);
   window.addEventListener('fb-ready', ()=>{ if(S.screen==='home') renderHome(); });
 })();
 </script>
+ 
+
