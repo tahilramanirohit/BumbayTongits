@@ -1,10 +1,9 @@
-
 <meta charset="utf-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no" />
 <title>Tongits</title>
 <style>
   @import url('https://fonts.googleapis.com/css2?family=Anton&family=Inter:wght@400;500;600;700&display=swap');
- 
+
   :root{
     --felt-1:#0e6b47; --felt-2:#0a4d33; --felt-3:#063422;
     --rail:#241209; --rail-2:#3a1e10;
@@ -36,7 +35,7 @@
   button{font-family:var(--body); cursor:pointer; border:none; color:inherit; font-size:1rem}
   button:focus-visible{outline:3px solid var(--brass-hi); outline-offset:2px}
   .app{min-height:100dvh; display:flex; flex-direction:column}
- 
+
   /* ---------- shared bits ---------- */
   .marquee{
     text-align:center; padding:6px 0 2px;
@@ -50,7 +49,7 @@
   .marquee .suits{letter-spacing:.5em; font-size:clamp(14px,4vw,20px); color:var(--brass); margin-top:2px}
   .marquee .suits .r{color:#e0745f}
   .tagline{color:var(--ink-dim); text-align:center; font-size:.9rem; margin:2px 0 0}
- 
+
   .btn{
     background:linear-gradient(180deg,#136c4a,#0c4d34);
     border:1px solid rgba(242,212,136,.35);
@@ -65,7 +64,7 @@
   .btn.ghost{background:rgba(0,0,0,.22); border:1px solid rgba(255,255,255,.14)}
   .btn:disabled{opacity:.4; cursor:not-allowed; box-shadow:none}
   .btn.sm{padding:9px 12px; font-size:.9rem; width:auto; border-radius:11px}
- 
+
   .panel{
     width:min(560px,92vw); margin:0 auto; padding:22px;
     background:linear-gradient(180deg, rgba(6,42,28,.72), rgba(6,42,28,.55));
@@ -90,7 +89,7 @@
   .row.wrap{flex-wrap:wrap}
   .center{text-align:center}
   a.link{color:var(--brass-hi); cursor:pointer; text-decoration:underline}
- 
+
   /* ---------- lobby ---------- */
   .code{
     font-family:var(--display); font-size:clamp(40px,13vw,64px); letter-spacing:.16em;
@@ -104,14 +103,15 @@
   .seatrow .dot{width:9px;height:9px;border-radius:50%;background:var(--ok);box-shadow:0 0 8px var(--ok)}
   .seatrow.empty{opacity:.5; font-style:italic}
   .seatrow .tag{margin-left:auto; font-size:.72rem; color:var(--brass); border:1px solid var(--brass-dim); padding:2px 7px; border-radius:20px}
- 
+
   /* ---------- table ---------- */
   .topbar{display:flex; align-items:center; gap:10px; padding:8px 12px}
   .topbar .rt{margin-left:auto; display:flex; gap:8px}
   .brandsm{font-family:var(--display); font-size:22px; color:var(--brass-hi); letter-spacing:.06em}
- 
+
   .table{flex:1; display:flex; flex-direction:column; gap:8px; padding:4px 10px 10px; position:relative}
   .opponents{display:flex; gap:10px; justify-content:center; flex-wrap:wrap}
+  .opponents.four .seat{min-width:96px; flex:1 1 96px; max-width:160px}
   .seat{
     min-width:120px; max-width:210px; flex:1 1 150px;
     background:rgba(0,0,0,.22); border:1px solid rgba(255,255,255,.08);
@@ -124,7 +124,7 @@
   .backrow{display:flex; margin-top:6px; min-height:34px}
   .backrow .cb{margin-left:-16px}
   .backrow .cb:first-child{margin-left:0}
- 
+
   .middle{display:flex; align-items:center; justify-content:center; gap:18px; padding:8px 0}
   .pile{display:flex; flex-direction:column; align-items:center; gap:4px}
   .pile .lbl{font-size:.72rem; color:var(--ink-dim); letter-spacing:.08em; text-transform:uppercase}
@@ -133,7 +133,7 @@
   }
   .discardslot{width:66px;height:92px;border-radius:9px; display:flex;align-items:center;justify-content:center;
     border:2px dashed rgba(255,255,255,.18)}
- 
+
   /* card */
   .card{
     width:66px;height:92px;border-radius:9px;background:var(--cream);
@@ -165,7 +165,7 @@
     bottom:6px; color:#2a1e05; background:var(--brass-hi); font-weight:800; font-size:.8rem; width:26px;height:26px;
     border-radius:50%; margin:0 auto; display:flex; align-items:center; justify-content:center;
     box-shadow:0 2px 6px rgba(0,0,0,.4)}
- 
+
   /* melds band */
   .melds{display:flex; gap:12px; overflow-x:auto; padding:6px 2px; min-height:70px; scrollbar-width:thin}
   .meldgroup{flex:0 0 auto; background:rgba(0,0,0,.2); border:1px solid rgba(255,255,255,.08); border-radius:12px; padding:6px 8px}
@@ -175,7 +175,7 @@
   .meld .card:first-child{margin-left:0}
   .meld.armable{cursor:pointer; padding:3px; margin:-3px; border-radius:10px; box-shadow:0 0 0 2px var(--brass-hi); animation:pulse 1.4s infinite}
   @keyframes pulse{50%{box-shadow:0 0 0 2px var(--brass-hi),0 0 16px rgba(242,212,136,.5)}}
- 
+
   /* your hand */
   .handwrap{margin-top:auto}
   .youbar{display:flex; align-items:center; gap:8px; padding:2px 4px 4px}
@@ -187,10 +187,10 @@
   .hand .card.sel{transform:translateY(-16px); box-shadow:0 10px 18px rgba(0,0,0,.5), 0 0 0 2px var(--brass-hi)}
   .hand .card:hover{transform:translateY(-6px)}
   .hand .card.sel:hover{transform:translateY(-16px)}
- 
+
   .actions{display:flex; gap:8px; padding:8px 6px 12px; flex-wrap:wrap; justify-content:center}
   .hint{font-size:.8rem; color:var(--brass-hi); text-align:center; min-height:18px; padding:0 8px}
- 
+
   /* overlays */
   .overlay{position:fixed; inset:0; background:rgba(3,20,13,.78); backdrop-filter:blur(4px);
     display:flex; align-items:center; justify-content:center; padding:18px; z-index:40}
@@ -207,20 +207,20 @@
   .curtain{position:fixed; inset:0; z-index:50; background:linear-gradient(160deg,#0a4d33,#052015);
     display:flex; flex-direction:column; align-items:center; justify-content:center; gap:18px; padding:24px; text-align:center}
   .curtain .who{font-family:var(--display); font-size:clamp(30px,9vw,54px); color:var(--brass-hi); letter-spacing:.04em}
- 
+
   .toast{position:fixed; left:50%; bottom:18px; transform:translateX(-50%);
     background:rgba(0,0,0,.82); color:var(--ink); padding:11px 16px; border-radius:12px;
     border:1px solid rgba(242,212,136,.3); font-size:.9rem; z-index:60; box-shadow:var(--shadow);
     max-width:90vw; text-align:center}
   .logline{font-size:.78rem; color:var(--ink-dim); text-align:center; padding:0 10px 4px; min-height:16px}
- 
+
   @media (prefers-reduced-motion: reduce){ *{animation:none !important; transition:none !important} }
   @media (max-width:420px){
     .card,.cb,.stockchip,.discardslot{width:52px;height:73px}
     .card .pip{font-size:24px}.card .c-r{font-size:13px}
     .seat{min-width:104px}
   }
- 
+
   /* ---- landing / brand / timer / fight ---- */
   .sitehead{ text-align:center; font-family:var(--display); letter-spacing:.05em; color:var(--brass-hi);
     font-size:clamp(20px,5.5vw,32px); padding:16px 0 2px; text-shadow:0 2px 0 var(--brass-dim); }
@@ -240,31 +240,46 @@
   .okpips{ display:flex; gap:8px; justify-content:center; margin:8px 0 14px; flex-wrap:wrap; }
   .okpip{ padding:6px 11px; border-radius:20px; border:1px solid rgba(255,255,255,.15); font-size:.82rem; color:var(--ink-dim); }
   .okpip.ok{ background:var(--ok); color:#04240f; border-color:var(--ok); font-weight:700; }
+
+  /* ---- hand tools: arrange + private groups ---- */
+  .handtools{display:flex; gap:6px; padding:4px 6px 0; justify-content:center; flex-wrap:wrap}
+  .btn.xs{padding:5px 10px; font-size:.72rem; border-radius:9px}
+  .hand{align-items:flex-end}
+  .loose{display:flex}
+  .loose .card:first-child{margin-left:0}
+  .handgroup{display:inline-flex; flex-direction:column; flex:0 0 auto; margin-right:12px;
+    border:1px dashed rgba(242,212,136,.35); border-radius:12px; padding:2px 6px 5px; background:rgba(242,212,136,.05)}
+  .handgroup.valid{border-color:var(--ok); background:rgba(46,204,113,.10)}
+  .ghdr{display:flex; align-items:center; gap:6px; font-size:.66rem; color:var(--ink-dim); padding:1px 2px; white-space:nowrap}
+  .handgroup.valid .ghdr{color:var(--ok); font-weight:700}
+  .gx{background:none; border:none; color:var(--ink-dim); font-size:1rem; line-height:1; padding:0 2px; cursor:pointer}
+  .grow{display:flex}
+  .grow .card:first-child{margin-left:0}
 </style>
- 
+
 <div class="app" id="app"></div>
 <div id="overlay"></div>
 <div id="toast"></div>
- 
+
 <script>/* =========================================================================
    TONGITS ENGINE  (pure, no DOM, no network)
-   Standard Filipino ruleset for 2–3 players.
+   Standard Filipino ruleset for 2–4 players.
    Cards are integer ids 0..51:  id = suit*13 + (rank-1)
      rank: 1=A, 2..10, 11=J, 12=Q, 13=K
      suit: 0=clubs(♣) 1=diamonds(♦) 2=hearts(♥) 3=spades(♠)
    ========================================================================= */
 (function (root) {
   "use strict";
- 
+
   const RANKS = ["A","2","3","4","5","6","7","8","9","10","J","Q","K"];
   const SUITS = ["♣","♦","♥","♠"];
   const RED = new Set([1, 2]); // diamonds, hearts
- 
+
   const rankOf = (id) => (id % 13) + 1;      // 1..13
   const suitOf = (id) => Math.floor(id / 13); // 0..3
   const isRed  = (id) => RED.has(suitOf(id));
   const label  = (id) => RANKS[rankOf(id) - 1] + SUITS[suitOf(id)];
- 
+
   // Point value: A=1, 2..10 face, J/Q/K = 10
   function cardValue(id) {
     const r = rankOf(id);
@@ -273,13 +288,13 @@
   function handPoints(ids) {
     return ids.reduce((s, id) => s + cardValue(id), 0);
   }
- 
+
   function makeDeck() {
     const d = [];
     for (let i = 0; i < 52; i++) d.push(i);
     return d;
   }
- 
+
   // Mulberry32 seeded PRNG so a room can share a deterministic shuffle if needed
   function mulberry32(a) {
     return function () {
@@ -298,9 +313,9 @@
     }
     return a;
   }
- 
+
   /* ---------------- Meld validation ---------------- */
- 
+
   function isSet(ids) {
     if (ids.length < 3 || ids.length > 4) return false;
     const r = rankOf(ids[0]);
@@ -308,28 +323,23 @@
     const suits = new Set(ids.map(suitOf));
     return suits.size === ids.length; // distinct suits (no duplicate cards)
   }
- 
+
   function isConsecutive(nums) {
     const s = [...nums].sort((a, b) => a - b);
     for (let i = 1; i < s.length; i++) if (s[i] !== s[i - 1] + 1) return false;
     return true;
   }
- 
+
   function isRun(ids) {
     if (ids.length < 3) return false;
     const suit = suitOf(ids[0]);
     if (!ids.every((id) => suitOf(id) === suit)) return false;
     const ranks = ids.map(rankOf);
     if (new Set(ranks).size !== ranks.length) return false; // no repeated rank
-    if (isConsecutive(ranks)) return true;
-    // Ace-high: A acts as 14 (…Q,K,A). No wrap-around (K,A,2 invalid).
-    if (ranks.includes(1)) {
-      const alt = ranks.map((r) => (r === 1 ? 14 : r));
-      if (isConsecutive(alt)) return true;
-    }
-    return false;
+    // Ace is LOW ONLY (A=1): A,2,3 is a run; Q,K,A is NOT, and K,A,2 never wraps.
+    return isConsecutive(ranks);
   }
- 
+
   function meldType(ids) {
     if (isSet(ids)) return "set";
     if (isRun(ids)) return "run";
@@ -338,14 +348,14 @@
   function isValidMeld(ids) {
     return meldType(ids) !== null;
   }
- 
+
   // A card can be laid off (sapaw) onto an exposed meld iff the union is still
   // a single valid meld. Works for both sets (grow to 4) and runs (extend end).
   function canSapaw(cardId, meldIds) {
     if (meldIds.includes(cardId)) return false;
     return isValidMeld(meldIds.concat(cardId));
   }
- 
+
   // Does the hand contain any valid new meld that uses `cardId`?
   // (Used to decide if taking the top discard is legal.)
   function existsMeldWith(cardId, handIds) {
@@ -358,28 +368,30 @@
     }
     return false;
   }
- 
+
   /* ---------------- Game lifecycle ---------------- */
- 
+
   // players: [{id, name}]  (2 or 3)
   function newGame(players, opts) {
     opts = opts || {};
-    if (players.length < 2 || players.length > 3)
-      throw new Error("Tongits needs 2 or 3 players.");
+    if (players.length < 2 || players.length > 4)
+      throw new Error("Tongits needs 2 to 4 players.");
     const rng = opts.seed != null ? mulberry32(opts.seed >>> 0) : Math.random;
     const dealer = opts.dealer != null ? opts.dealer % players.length : 0;
- 
+
     const deck = shuffle(makeDeck(), rng);
     const hands = players.map(() => []);
     let k = 0;
-    // Dealer gets 13, everyone else 12.
+    // 2-3 players: dealer 13, others 12. 4 players: dealer 10, others 9 —
+    // a smaller deal so the stock stays 15 cards instead of collapsing to 3.
+    const base = players.length >= 4 ? 9 : 12;
     for (let seat = 0; seat < players.length; seat++) {
-      const count = seat === dealer ? 13 : 12;
+      const count = seat === dealer ? base + 1 : base;
       for (let c = 0; c < count; c++) hands[seat].push(deck[k++]);
     }
     const stock = deck.slice(k); // remainder
     hands.forEach((h) => h.sort((a, b) => a - b));
- 
+
     return {
       players: players.map((p, i) => ({ id: p.id, name: p.name, seat: i })),
       dealer,
@@ -398,16 +410,16 @@
       round: opts.round || 1,
     };
   }
- 
+
   const cur = (s) => s.players[s.turn];
   const nextSeat = (s, seat) => (seat + 1) % s.players.length;
- 
+
   function meldById(s, mid) {
     return s.melds.find((m) => m.id === mid);
   }
- 
+
   /* ---------- Actions (all mutate a copy is caller's job; here we mutate s) --- */
- 
+
   function draw(s, source) {
     if (s.status !== "playing") throw new Error("Round is over.");
     if (s.phase !== "draw") throw new Error("Not the draw phase.");
@@ -436,7 +448,7 @@
     }
     return s;
   }
- 
+
   function lay(s, cardIds) {
     if (s.status !== "playing") throw new Error("Round is over.");
     if (!s.hasDrawn) throw new Error("Draw first.");
@@ -457,7 +469,7 @@
     checkGoOut(s);
     return s;
   }
- 
+
   function sapaw(s, cardId, meldId) {
     if (s.status !== "playing") throw new Error("Round is over.");
     if (!s.hasDrawn) throw new Error("Draw first.");
@@ -475,7 +487,7 @@
     checkGoOut(s);
     return s;
   }
- 
+
   function discard(s, cardId) {
     if (s.status !== "playing") throw new Error("Round is over.");
     if (!s.hasDrawn) throw new Error("Draw before discarding.");
@@ -496,7 +508,7 @@
     advance(s);
     return s;
   }
- 
+
   // "Tumba" / call: only allowed at the start of your turn (draw phase),
   // and only if you already have at least one exposed meld.
   function call(s) {
@@ -506,13 +518,13 @@
       throw new Error("You need at least one meld down before you can call.");
     return endRound(s, "call", s.turn);
   }
- 
+
   function checkGoOut(s) {
     if (s.status === "playing" && s.hands[s.turn].length === 0) {
       endRound(s, "tongits", s.turn);
     }
   }
- 
+
   function advance(s) {
     s.pendingDiscard = null;
     let seat = nextSeat(s, s.turn);
@@ -526,7 +538,7 @@
     s.log.push(`${cur(s).name}'s turn.`);
     return s;
   }
- 
+
   function endRound(s, reason, winnerSeat) {
     const scores = s.players.map((p, seat) => ({
       seat, name: p.name, points: handPoints(s.hands[seat]), cards: s.hands[seat].length,
@@ -564,7 +576,7 @@
     s.log.push(names[reason] || `${s.players[winner].name} wins.`);
     return s;
   }
- 
+
   /* ---------- Convenience: what can the current seat do right now? ---------- */
   function legal(s, seat) {
     const out = { draw: false, drawDiscard: false, meld: false, sapaw: false, discard: false, call: false };
@@ -579,7 +591,7 @@
     }
     return out;
   }
- 
+
   const API = {
     RANKS, SUITS, rankOf, suitOf, isRed, label, cardValue, handPoints,
     makeDeck, shuffle, mulberry32,
@@ -587,7 +599,7 @@
     newGame, draw, lay, sapaw, discard, call, legal, endRound,
     _internal: { advance, nextSeat },
   };
- 
+
   if (typeof module !== "undefined" && module.exports) module.exports = API;
   root.TongitsEngine = API;
 })(typeof window !== "undefined" ? window : globalThis);
@@ -602,7 +614,7 @@
     const ALPH = "ABCDEFGHJKLMNPQRSTUVWXYZ23456789";
     const genCode = () => { let s = ""; for (let i = 0; i < 4; i++) s += ALPH[Math.floor(Math.random() * ALPH.length)]; return s; };
     const clone = (o) => JSON.parse(JSON.stringify(o));
- 
+
     function createRoomObj(code, me) {
       return { code, hostId: me.pid, status: "lobby", updatedAt: Date.now(),
         players: [{ pid: me.pid, name: me.name, seat: 0 }], game: null };
@@ -611,7 +623,7 @@
       if (!room) throw new Error("No room with that code.");
       if (room.players.some((p) => p.pid === me.pid)) return room; // already joined
       if (room.status !== "lobby") throw new Error("That game already started.");
-      if (room.players.length >= 3) throw new Error("That room is full (max 3).");
+      if (room.players.length >= 4) throw new Error("That room is full (max 4).");
       room.players.push({ pid: me.pid, name: me.name, seat: room.players.length });
       room.updatedAt = Date.now();
       return room;
@@ -702,11 +714,11 @@
       }
       return room; // mid-game: player stays listed so the round state is preserved
     }
-    const BOT_NAMES = ["Bot Rey", "Bot Nena", "Bot Lito"];
+    const BOT_NAMES = ["Bot Rey", "Bot Nena", "Bot Lito", "Bot Chit"];
     function addBotObj(room) {
       if (!room) throw new Error("Room is gone.");
       if (room.status !== "lobby") throw new Error("The game already started.");
-      if (room.players.length >= 3) throw new Error("The room is full (max 3).");
+      if (room.players.length >= 4) throw new Error("The room is full (max 4).");
       const n = room.players.filter((p) => p.bot).length;
       room.players.push({ pid: "bot_" + n + "_" + room.players.length, name: BOT_NAMES[n % BOT_NAMES.length], seat: room.players.length, bot: true });
       room.updatedAt = Date.now();
@@ -735,7 +747,7 @@
   "use strict";
   function makeBot(E) {
     const val = E.cardValue, rank = E.rankOf, suit = E.suitOf;
- 
+
     // ---- generate candidate melds present in a hand ----
     function candidateMelds(hand) {
       const out = [];
@@ -772,7 +784,7 @@
       return out.filter((m) => E.isValidMeld(m));
     }
     const meldPoints = (ids) => ids.reduce((s, id) => s + val(id), 0);
- 
+
     // best single meld to lay right now (most points removed, then most cards)
     function bestMeld(hand) {
       const c = candidateMelds(hand);
@@ -800,7 +812,7 @@
         }
       return best;
     }
- 
+
     function layAll(g, seat) {
       let m;
       while (g.status === "playing" && (m = bestMeld(g.hands[seat]))) E.lay(g, m);
@@ -815,7 +827,7 @@
         }
       }
     }
- 
+
     // choose which card to throw: least meld-potential, break ties by highest points
     function chooseDiscard(g, seat) {
       const hand = g.hands[seat].filter((c) => c !== g.pendingDiscard);
@@ -833,7 +845,7 @@
       }
       return pick;
     }
- 
+
     // play one full turn for `seat`, mutating g via the engine.
     // opts.noCall = never initiate a call (used for timeout auto-moves & bots here).
     function takeTurn(g, seat, opts) {
@@ -862,7 +874,7 @@
       // discard to end the turn
       E.discard(g, chooseDiscard(g, seat));
     }
- 
+
     return { takeTurn, candidateMelds, bestMeld, chooseDiscard };
   }
   if (typeof module !== "undefined" && module.exports) module.exports = makeBot;
@@ -950,7 +962,7 @@ const E = window.TongitsEngine;
 const $app = document.getElementById('app');
 const $ov  = document.getElementById('overlay');
 const $toastEl = document.getElementById('toast');
- 
+
 /* ---------------- transport: Supabase (Realtime + Postgres) ---------------- */
 const NET = window.TongitsNet(E);            // pure room/lobby/move logic (shared with tests)
 const BOT = window.TongitsBot(E);            // bot AI
@@ -1003,7 +1015,7 @@ function maybeRunOnlineBot(){
 async function addBot(){ await window.FB.transaction(S.room.code, room=>{ if(!room||room.hostId!==S.me.pid) return; return NET.addBotObj(room); }); }
 async function removeBot(){ await window.FB.transaction(S.room.code, room=>{ if(!room||room.hostId!==S.me.pid) return; return NET.removeBotObj(room); }); }
 function enterRoom(code){ S.mode='online'; S.screen='lobby'; S.selection=[]; $ov.innerHTML=''; lset('tongits:last',{code, name:S.me.name}); subscribe(code); }
- 
+
 /* ---------------- app state ---------------- */
 const S = {
   screen:'landing', mode:null,
@@ -1011,14 +1023,15 @@ const S = {
   room:null, seat:null,
   local:null,
   selection:[], curtain:null, busy:false, unsub:null, watchCode:null, botTimer:null, botToken:null,
-  timerInt:null, clockKey:null, clockWarned:false, clockExpired:false, fightShown:null,
+  timerInt:null, clockKey:null, clockWarned:false, clockExpired:false, fightShown:null, lastTick:null,
+  handOrder:[], groups:[], handKey:null, sortMode:'rank',
 };
- 
+
 function genPid(){ return 'p'+Math.random().toString(36).slice(2,10)+Date.now().toString(36).slice(-4); }
 function genCode(){ const a='ABCDEFGHJKLMNPQRSTUVWXYZ23456789'; let s=''; for(let i=0;i<4;i++) s+=a[Math.floor(Math.random()*a.length)]; return s; }
 function toast(msg){ $toastEl.innerHTML=`<div class="toast">${esc(msg)}</div>`; clearTimeout(toast._t); toast._t=setTimeout(()=>$toastEl.innerHTML='',2600); }
 function esc(s){ return String(s).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c])); }
- 
+
 /* ---------------- sound (Web Audio; no files needed) ---------------- */
 const Sound = (function(){
   let ctx=null;
@@ -1034,12 +1047,13 @@ const Sound = (function(){
     resume,
     turn(){ resume(); beep(659,0,0.15,'sine',0.25); beep(988,0.13,0.22,'sine',0.22); },
     warn(){ resume(); beep(440,0,0.13,'square',0.18); beep(440,0.2,0.16,'square',0.18); },
+    tick(n){ resume(); const f=520+(11-n)*32; if(n<=3){ beep(f,0,0.14,'square',0.24); beep(f*1.5,0.05,0.10,'sine',0.12); } else beep(f,0,0.07,'square',0.15); },
     fight(){ resume(); beep(330,0,0.18,'sawtooth',0.2); beep(494,0.16,0.30,'sawtooth',0.2); },
     ok(){ resume(); beep(880,0,0.08,'sine',0.14); },
   };
 })();
 document.addEventListener('pointerdown', ()=>Sound.resume(), {passive:true});
- 
+
 /* ---------------- card rendering ---------------- */
 function cardHTML(id, cls){
   const r = E.RANKS[E.rankOf(id)-1], s = E.SUITS[E.suitOf(id)], red = E.isRed(id);
@@ -1048,7 +1062,7 @@ function cardHTML(id, cls){
     <div class="pip">${s}</div>
     <div class="c-br"><span class="c-r">${r}</span><span class="c-s">${s}</span></div></div>`;
 }
- 
+
 /* ============================================================ RENDER ROOT */
 function render(){
   if(S.curtain){ renderCurtain(); return; } else { document.getElementById('curtain')?.remove(); }
@@ -1057,7 +1071,7 @@ function render(){
   if(S.screen==='lobby') return renderLobby();
   if(S.screen==='game')  { renderTable(); maybeRenderFight(); return; }
 }
- 
+
 /* ---------------- LANDING (Games ni Bumbay) ---------------- */
 function renderLanding(){
   $ov.innerHTML='';
@@ -1073,7 +1087,7 @@ function renderLanding(){
   </div>`;
   document.getElementById('play-tongits').onclick=()=>{ Sound.resume(); S.screen='home'; render(); };
 }
- 
+
 /* ---------------- HOME ---------------- */
 function renderHome(){
   $ov.innerHTML='';
@@ -1103,7 +1117,7 @@ function renderHome(){
   document.getElementById('to-landing').onclick =()=>{ S.screen='landing'; render(); };
 }
 function ensureName(){ const n=(S.me.name||'').trim(); if(!n){ toast('Enter your name first.'); document.getElementById('nm')?.focus(); return false;} S.me.name=n; return true; }
- 
+
 /* ---------------- ONLINE: create/join menu ---------------- */
 function showOnlineMenu(){
   $ov.innerHTML = `<div class="overlay"><div class="sheet">
@@ -1122,7 +1136,7 @@ function showOnlineMenu(){
   document.getElementById('o-join').onclick=()=>{ const c=(document.getElementById('jc').value||'').toUpperCase().trim(); if(c.length!==4){toast('Codes are 4 letters.');return;} joinRoom(c); };
   document.getElementById('o-cancel').onclick=()=>{ $ov.innerHTML=''; };
 }
- 
+
 async function createRoom(){
   if(!netReady()){ toast('Add your Supabase URL + key to enable online play.'); return; }
   if(S.busy)return; S.busy=true;
@@ -1132,7 +1146,7 @@ async function createRoom(){
   if(!made){ toast('Could not create a room — check your connection.'); return; }
   enterRoom(code);
 }
- 
+
 async function joinRoom(code){
   if(!netReady()){ toast('Add your Supabase URL + key to enable online play.'); return; }
   if(S.busy)return; S.busy=true; window.__lastTxErr=null;
@@ -1144,14 +1158,14 @@ async function joinRoom(code){
   if(!inRoom){ toast((window.__lastTxErr && window.__lastTxErr.message) || ('Could not join '+code+'.')); window.__lastTxErr=null; return; }
   enterRoom(code);
 }
- 
+
 function mySeat(){ if(S.mode!=='online'||!S.room) return null; const p=S.room.players.find(p=>p.pid===S.me.pid); return p?p.seat:null; }
- 
+
 /* ---------------- LOBBY ---------------- */
 function renderLobby(){
   $ov.innerHTML='';
   const r=S.room, isHost=r.hostId===S.me.pid;
-  const seats=[0,1,2].map(i=>{
+  const seats=[0,1,2,3].map(i=>{
     const p=r.players.find(x=>x.seat===i);
     if(p) return `<div class="seatrow"><span class="dot"></span>${p.bot?'🤖 ':''}${esc(p.name)}${p.pid===S.me.pid?' <span class="muted">(you)</span>':''}${p.bot?'<span class="tag">bot</span>':''}${p.pid===r.hostId?'<span class="tag">host</span>':''}</div>`;
     return `<div class="seatrow empty"><span class="dot" style="background:#555;box-shadow:none"></span>Waiting…</div>`;
@@ -1167,11 +1181,11 @@ function renderLobby(){
       <button class="btn sm ghost" id="copy" style="width:100%">Copy code</button>
       <div class="seatlist">${seats}</div>
       ${isHost ? `<div class="row" style="gap:8px">
-          <button class="btn ghost sm" id="addbot" style="flex:1" ${r.players.length>=3?'disabled':''}>+ Add bot</button>
+          <button class="btn ghost sm" id="addbot" style="flex:1" ${r.players.length>=4?'disabled':''}>+ Add bot</button>
           <button class="btn ghost sm" id="rmbot" style="flex:1" ${botCount<1?'disabled':''}>− Remove bot</button>
         </div>` : ''}
       ${isHost
-        ? `<button class="btn primary" id="start" ${r.players.length>=2?'':'disabled'}>Deal & start (${r.players.length}/3)</button>
+        ? `<button class="btn primary" id="start" ${r.players.length>=2?'':'disabled'}>Deal & start (${r.players.length}/4)</button>
            ${r.players.length<2?'<p class="muted center">Add a friend (share the code) or a bot to begin.</p>':''}`
         : `<p class="muted center">Waiting for the host to deal…</p>`}
     </div>
@@ -1184,47 +1198,49 @@ function renderLobby(){
     if(ab) ab.onclick=addBot; if(rb) rb.onclick=removeBot;
   }
 }
- 
+
 async function startOnlineGame(){
   window.__lastTxErr=null;
   const res=await window.FB.transaction(S.room.code, room=>{ if(!room||room.hostId!==S.me.pid) return; return NET.startGameObj(room); });
   if(!res.committed){ toast((window.__lastTxErr&&window.__lastTxErr.message)||'Could not start the game.'); window.__lastTxErr=null; }
   // the live subscription flips everyone (including us) to the table
 }
- 
+
 async function leaveRoom(){
   const code=S.room&&S.room.code;
   teardownOnline();
   if(code){ try{ await window.FB.transaction(code, room=> NET.leaveRoomObj(room, S.me.pid)); }catch(e){} }
   S.room=null; S.mode=null; S.seat=null; S.screen='home'; render();
 }
- 
+
 /* online sync is push-based via window.FB.watch → onRoomUpdate (see transport, above) */
- 
+
 /* ---------------- LOCAL (pass & play, with optional bots) ---------------- */
-const LOCAL_PRESETS = [
-  { label:'You vs 2 bots',     humans:1, bots:2 },
-  { label:'You vs 1 bot',      humans:1, bots:1 },
-  { label:'2 players',         humans:2, bots:0 },
-  { label:'2 players + 1 bot', humans:2, bots:1 },
-  { label:'3 players',         humans:3, bots:0 },
-];
 function showLocalSetup(){
-  const presets=LOCAL_PRESETS.map((p,i)=>`<button class="btn ${i===0?'primary':''}" data-preset="${i}" style="width:100%">${p.label}</button>`).join('');
+  if(!S.setup) S.setup={ total:3, bots:2 };
   $ov.innerHTML=`<div class="overlay"><div class="sheet">
     <h2>Play on this device</h2>
-    <p class="muted">Pick who's playing. Bots take their own turns automatically. With two or more humans, the screen hides between turns so nobody sees your hand.</p>
-    <div class="stack" style="margin:10px 0">${presets}</div>
+    <p class="muted">Bots take their own turns automatically. With two or more humans, the screen hides between turns so nobody sees your hand.</p>
+    <h3>How many players?</h3>
+    <div class="row" id="totals" style="gap:8px"></div>
+    <h3>How many of them are bots?</h3>
+    <div class="row" id="botrow" style="gap:8px"></div>
     <div id="names" class="stack"></div>
     <button class="btn ghost sm" id="l-cancel" style="width:100%;margin-top:10px">Back</button>
   </div></div>`;
   document.getElementById('l-cancel').onclick=()=>{$ov.innerHTML='';};
-  $ov.querySelectorAll('[data-preset]').forEach(b=> b.onclick=()=>{
-    $ov.querySelectorAll('[data-preset]').forEach(x=>x.classList.remove('primary'));
-    b.classList.add('primary');
-    buildNameFields(LOCAL_PRESETS[+b.dataset.preset]);
-  });
-  buildNameFields(LOCAL_PRESETS[0]);
+  renderSetupChoices();
+}
+function renderSetupChoices(){
+  const t=S.setup.total, maxBots=t-1;
+  if(S.setup.bots>maxBots) S.setup.bots=maxBots;
+  document.getElementById('totals').innerHTML=[2,3,4]
+    .map(n=>`<button class="btn ${n===t?'primary':''}" data-total="${n}" style="flex:1">${n}</button>`).join('');
+  let bs=''; for(let b=0;b<=maxBots;b++) bs+=`<button class="btn ${b===S.setup.bots?'primary':''}" data-bots="${b}" style="flex:1">${b}</button>`;
+  document.getElementById('botrow').innerHTML=bs;
+  document.querySelectorAll('[data-total]').forEach(b=> b.onclick=()=>{ S.setup.total=+b.dataset.total; renderSetupChoices(); });
+  document.querySelectorAll('[data-bots]').forEach(b=> b.onclick=()=>{ S.setup.bots=+b.dataset.bots; renderSetupChoices(); });
+  buildNameFields({ humans:t-S.setup.bots, bots:S.setup.bots });
 }
 function buildNameFields(preset){
   const box=document.getElementById('names'); if(!box)return;
@@ -1241,7 +1257,7 @@ function buildNameFields(preset){
 function startLocalGame(preset, names){
   const players=[];
   for(let i=0;i<preset.humans;i++) players.push({ name:names[i]||('Player '+(i+1)), bot:false, seat:players.length });
-  const bn=['Bot Rey','Bot Nena','Bot Lito'];
+  const bn=['Bot Rey','Bot Nena','Bot Lito','Bot Chit'];
   for(let b=0;b<preset.bots;b++) players.push({ name:bn[b%bn.length], bot:true, seat:players.length });
   const game=E.newGame(players.map((p,i)=>({id:'L'+i,name:p.name})),{dealer:0});
   const firstHuman=players.findIndex(p=>!p.bot);
@@ -1283,12 +1299,12 @@ function scheduleLocalBot(){
     localAdvance(before);
   }, 750);
 }
- 
+
 /* which game object + view perspective are we showing? */
 function G(){ return S.mode==='online' ? (S.room&&S.room.game) : (S.local&&S.local.game); }
 function viewSeat(){ return S.mode==='online' ? mySeat() : (S.local?S.local.viewer:0); }
 function canAct(){ const g=G(); if(!g) return false; if(getFight()) return false; if(isBotSeat(g.turn)) return false; return S.mode==='online' ? g.turn===mySeat() : g.turn===S.local.viewer; }
- 
+
 /* ---------------- TABLE ---------------- */
 function renderTable(){
   $ov.innerHTML='';
@@ -1296,12 +1312,12 @@ function renderTable(){
   if(g.status==='over'){ renderTable_board(g); showRoundOver(g); return; }
   renderTable_board(g);
 }
- 
+
 function renderTable_board(g){
   const vs=viewSeat(), me=vs, act=canAct();
   const L = act ? E.legal(g, me) : {draw:false,drawDiscard:false,meld:false,sapaw:false,discard:false,call:false};
   const sel=S.selection.slice();
- 
+
   // opponents (everyone except me), in seat order starting after me
   const opp=[];
   for(let k=1;k<g.players.length;k++){ opp.push((me+k)%g.players.length); }
@@ -1313,14 +1329,14 @@ function renderTable_board(g){
       <div class="meta">${cnt} cards${g.melds.some(m=>m.owner===si)?' · has melds':''}</div>
       <div class="backrow">${backs}</div></div>`;
   }).join('');
- 
+
   // stock + discard
   const top = g.discard.length? g.discard[g.discard.length-1] : null;
   const discardHTML = top
     ? cardHTML(top, 'disc'+(L.drawDiscard?' takeable':''))
     : `<div class="discardslot">empty</div>`;
   const stockHTML = `<div class="stockchip cb" data-n="${g.stock.length}"></div>`;
- 
+
   // melds band (armable if exactly one selected card can sapaw)
   const armCard = (act && L.sapaw && sel.length===1) ? sel[0] : null;
   const meldsByOwner={};
@@ -1335,12 +1351,21 @@ function renderTable_board(g){
     meldsHTML+=`<div class="meldgroup"><div class="who">${esc(g.players[owner].name)}${(+owner)===me?' (you)':''}</div>${rows}</div>`;
   });
   if(!meldsHTML) meldsHTML=`<div class="muted" style="margin:auto">No melds on the table yet.</div>`;
- 
-  // your hand
+
+  // your hand — arranged client-side (order + private groups never touch game state)
   const hand=g.hands[me].slice();
-  const handHTML=hand.map(id=>cardHTML(id, sel.includes(id)?'sel':'')).join('');
+  const arr=arrangeHand(g, me, hand);
+  const groupsHTML=arr.groups.map((gr,gi)=>{
+    const valid=gr.length>=3 && E.isValidMeld(gr);
+    const t=valid?E.meldType(gr):null;
+    return `<div class="handgroup ${valid?'valid':''}" data-gi="${gi}">
+      <div class="ghdr">${valid?'✓ '+t:gr.length+' cards'}<button class="gx" data-gx="${gi}" title="Ungroup">×</button></div>
+      <div class="grow">${gr.map(id=>cardHTML(id, sel.includes(id)?'sel':'')).join('')}</div></div>`;
+  }).join('');
+  const handHTML=groupsHTML+`<div class="loose">${arr.loose.map(id=>cardHTML(id, sel.includes(id)?'sel':'')).join('')}</div>`;
   const myPts=E.handPoints(hand);
- 
+  const canGroup = sel.length>=2;
+
   // hint + actions
   let hint='';
   if(!act && isBotSeat(g.turn)) hint=`🤖 ${esc(g.players[g.turn].name)} is playing…`;
@@ -1350,17 +1375,17 @@ function renderTable_board(g){
   else if(sel.length===1) hint='Tap a glowing meld to lay this card off, or pick more cards to meld / discard.';
   else if(sel.length>=3) hint = E.isValidMeld(sel)?'Valid meld — tap “Meld”.':'Pick a set (same rank) or run (same suit in sequence).';
   else hint='Pick cards to meld, or one card to discard.';
- 
+
   const canMeld = act && g.phase==='meld' && sel.length>=3 && E.isValidMeld(sel);
   const canDiscard = act && L.discard && sel.length===1 && !(g.pendingDiscard!=null && sel[0]===g.pendingDiscard);
- 
+
   const actions = g.phase==='draw'
     ? `<button class="btn sm primary" id="a-draw" ${L.draw?'':'disabled'}>Draw stock</button>
        <button class="btn sm" id="a-take" ${L.drawDiscard?'':'disabled'}>Take discard</button>
        <button class="btn sm ghost" id="a-call" ${L.call?'':'disabled'}>Call</button>`
     : `<button class="btn sm primary" id="a-meld" ${canMeld?'':'disabled'}>Meld</button>
        <button class="btn sm" id="a-discard" ${canDiscard?'':'disabled'}>Discard</button>`;
- 
+
   $app.innerHTML=`
   <div class="topbar"><span class="brandsm">TONGITS</span>
     <div class="rt">
@@ -1368,7 +1393,7 @@ function renderTable_board(g){
       <button class="btn ghost sm" id="t-leave">Leave</button>
     </div></div>
   <div class="table">
-    <div class="opponents">${oppHTML}</div>
+    <div class="opponents ${g.players.length>=4?'four':''}">${oppHTML}</div>
     <div class="middle">
       <div class="pile"><div class="lbl">Stock</div>${stockHTML}</div>
       <div class="pile"><div class="lbl">Discard</div>${discardHTML}</div>
@@ -1379,21 +1404,36 @@ function renderTable_board(g){
       <div class="hint">${hint}</div>
       <div class="youbar"><span class="yn">${esc(g.players[me].name)} ${g.turn===me?'<span class="badge" style="background:var(--brass-hi);color:#2a1e05;padding:1px 7px;border-radius:20px;font-size:.7rem">your turn</span>':''}</span>
         <span class="pts">hand: ${g.hands[me].length} cards · ${myPts} pts</span><span class="clock" id="turnclock"></span></div>
+      <div class="handtools">
+        <button class="btn ghost xs" id="h-sort">↕ Sort by ${S.sortMode==='rank'?'suit':'rank'}</button>
+        <button class="btn ghost xs" id="h-shuffle">⇄ Shuffle</button>
+        <button class="btn ghost xs" id="h-group" ${canGroup?'':'disabled'}>⊞ Group ${canGroup?'('+sel.length+')':''}</button>
+      </div>
       <div class="hand" id="hand">${handHTML}</div>
       <div class="actions">${actions}</div>
     </div>
   </div>`;
- 
+
   // ---- bind ----
   document.getElementById('t-rules').onclick=showRules;
   document.getElementById('t-leave').onclick=()=>{ if(S.mode==='online')leaveRoom(); else { S.local=null;S.mode=null;S.screen='home';render(); } };
- 
+
+  // hand selection + arrange tools work even when it's not your turn (purely local)
+  document.querySelectorAll('#hand .card').forEach(el=>{
+    el.onclick=()=>{ const id=+el.dataset.id; const i=S.selection.indexOf(id);
+      if(i>=0) S.selection.splice(i,1); else S.selection.push(id); renderTable_board(g); };
+  });
+  document.querySelectorAll('.gx').forEach(el=>{
+    el.onclick=(ev)=>{ ev.stopPropagation(); S.groups.splice(+el.dataset.gx,1); renderTable_board(g); };
+  });
+  const hs=document.getElementById('h-sort');
+  if(hs) hs.onclick=()=>{ S.sortMode = S.sortMode==='rank'?'suit':'rank'; sortHand(S.sortMode); renderTable_board(g); };
+  const hf=document.getElementById('h-shuffle');
+  if(hf) hf.onclick=()=>{ shuffleHand(); renderTable_board(g); };
+  const hg=document.getElementById('h-group');
+  if(hg) hg.onclick=()=>{ if(S.selection.length>=2){ groupSelection(); renderTable_board(g); } };
+
   if(act){
-    // hand selection
-    document.querySelectorAll('#hand .card').forEach(el=>{
-      el.onclick=()=>{ const id=+el.dataset.id; const i=S.selection.indexOf(id);
-        if(i>=0) S.selection.splice(i,1); else S.selection.push(id); renderTable_board(g); };
-    });
     // take discard by tapping the pile too
     if(L.drawDiscard){ const d=document.querySelector('.disc'); if(d) d.onclick=()=>doAction(gg=>E.draw(gg,'discard')); }
     if(L.draw){ const st=document.querySelector('.stockchip'); if(st) st.onclick=()=>doAction(gg=>E.draw(gg,'stock')); }
@@ -1411,7 +1451,7 @@ function renderTable_board(g){
     bind('a-discard',()=>{ if(canDiscard) doAction(gg=>E.discard(gg, S.selection[0])); });
   }
 }
- 
+
 function confirmCall(){
   $ov.innerHTML=`<div class="overlay"><div class="sheet">
     <h2>Call?</h2>
@@ -1422,7 +1462,7 @@ function confirmCall(){
   document.getElementById('c-no').onclick=()=>{$ov.innerHTML='';};
   document.getElementById('c-yes').onclick=()=>{ $ov.innerHTML=''; doAction(gg=>E.call(gg)); };
 }
- 
+
 /* apply an engine action for either mode, then sync/re-render */
 async function doAction(fn){
   const g=G(); if(!g) return;
@@ -1447,7 +1487,7 @@ async function doAction(fn){
     localAdvance(before);
   }
 }
- 
+
 /* ---------------- FIGHT vote (call gated by everyone tapping OK) ---------------- */
 function getFight(){ return S.mode==='online' ? (S.room&&S.room.fight) : (S.local&&S.local.fight); }
 function startFight(){
@@ -1519,20 +1559,54 @@ function maybeRenderFight(){
   const okb=document.getElementById('f-ok'); if(okb) okb.onclick=()=>{ Sound.ok(); fightOk(); };
   const cxb=document.getElementById('f-cancel'); if(cxb) cxb.onclick=cancelFight;
 }
- 
+
+/* ---------------- hand arrangement (client-side only) ----------------
+   Order and groups are display-only: they live in S, never in the game state,
+   so nothing here is synced online or can affect the rules. */
+function arrangeHand(g, me, hand){
+  const key=(S.mode==='online'?(S.room&&S.room.code):'L')+'#'+(g.round||1)+'#'+me;
+  if(S.handKey!==key){ S.handKey=key; S.handOrder=[]; S.groups=[]; }   // fresh deal → fresh arrangement
+  const inHand=new Set(hand);
+  S.groups=(S.groups||[]).map(gr=>gr.filter(id=>inHand.has(id))).filter(gr=>gr.length>=2);
+  S.handOrder=(S.handOrder||[]).filter(id=>inHand.has(id));
+  hand.forEach(id=>{ if(!S.handOrder.includes(id)) S.handOrder.push(id); });   // new cards go to the end
+  const grouped=new Set(); S.groups.forEach(gr=>gr.forEach(id=>grouped.add(id)));
+  return { groups:S.groups, loose:S.handOrder.filter(id=>!grouped.has(id)) };
+}
+function sortHand(mode){
+  S.handOrder.sort((a,b)=> mode==='suit'
+    ? (E.suitOf(a)-E.suitOf(b) || E.rankOf(a)-E.rankOf(b))
+    : (E.rankOf(a)-E.rankOf(b) || E.suitOf(a)-E.suitOf(b)));
+  S.groups.forEach(gr=>gr.sort((a,b)=> E.suitOf(a)-E.suitOf(b) || E.rankOf(a)-E.rankOf(b)));
+}
+function shuffleHand(){
+  const a=S.handOrder;
+  for(let i=a.length-1;i>0;i--){ const j=Math.floor(Math.random()*(i+1)); [a[i],a[j]]=[a[j],a[i]]; }
+}
+function groupSelection(){
+  const picked=S.selection.slice();
+  if(picked.length<2) return;
+  const set=new Set(picked);
+  S.groups=S.groups.map(gr=>gr.filter(id=>!set.has(id))).filter(gr=>gr.length>=2); // a card lives in one group
+  S.groups.push(picked);
+  S.selection=[];
+}
+
 /* ---------------- turn timer + sounds ---------------- */
 function tickTimer(){
   const el=document.getElementById('turnclock');
   const g=G();
   if(!g || S.screen!=='game' || S.curtain || g.status!=='playing' || getFight()){ if(el) el.textContent=''; return; }
   const key=(S.mode==='online'?S.room.code:'L')+'#'+(g.turnStart||0)+'#'+g.turn+'#'+(g.round||1);
-  if(key!==S.clockKey){ S.clockKey=key; S.clockWarned=false; S.clockExpired=false;
+  if(key!==S.clockKey){ S.clockKey=key; S.clockWarned=false; S.clockExpired=false; S.lastTick=null;
     if(canAct() && !isBotSeat(g.turn)) Sound.turn();
   }
   const rem = g.turnStart ? Math.max(0, 30-(Date.now()-g.turnStart)/1000) : 30;
   if(el){ el.textContent='⏱ '+Math.ceil(rem)+'s'; el.style.color = rem<=10 ? 'var(--bad)' : 'var(--ink-dim)'; }
   const mine = canAct() && !isBotSeat(g.turn);
-  if(mine && rem<=10 && !S.clockWarned){ S.clockWarned=true; Sound.warn(); }
+  // audible countdown: one tick per second for the last 10 seconds of YOUR turn
+  const secs=Math.ceil(rem);
+  if(mine && secs<=10 && secs>=1 && S.lastTick!==secs){ S.lastTick=secs; Sound.tick(secs); }
   if(!S.clockExpired){
     if(mine && rem<=0){ S.clockExpired=true; timeoutMove(); }
     else if(S.mode==='online' && S.room && S.room.hostId===S.me.pid && !isBotSeat(g.turn)){
@@ -1559,7 +1633,7 @@ function timeoutMove(seat){
     S.selection=[]; localAdvance(before);
   }
 }
- 
+
 /* ---------------- CURTAIN (local pass-device) ---------------- */
 function renderCurtain(){
   $ov.innerHTML='';
@@ -1571,7 +1645,7 @@ function renderCurtain(){
     <button class="btn primary" id="cx" style="width:auto;padding:14px 26px">I’m ${esc(S.curtain.name)} — show my hand</button>`;
   document.getElementById('cx').onclick=()=>{ if(S.curtain&&S.curtain.seat!=null&&S.local){ S.local.viewer=S.curtain.seat; if(S.local.game) S.local.game.turnStart=Date.now(); } S.curtain=null; render(); };
 }
- 
+
 /* ---------------- ROUND OVER ---------------- */
 function showRoundOver(g){
   const res=g.result;
@@ -1593,7 +1667,7 @@ function showRoundOver(g){
   const again=document.getElementById('again'); if(again) again.onclick=()=>nextRound(g);
   document.getElementById('tomenu').onclick=()=>{ if(S.mode==='online')leaveRoom(); else{ S.local=null;S.mode=null;S.screen='home';render(); } };
 }
- 
+
 async function nextRound(g){
   const prevWinner=g.result.winner;
   if(S.mode==='online'){
@@ -1608,17 +1682,17 @@ async function nextRound(g){
     S.selection=[]; $ov.innerHTML=''; localKickoff();
   }
 }
- 
+
 /* ---------------- RULES ---------------- */
 function showRules(){
   $ov.innerHTML=`<div class="overlay"><div class="sheet">
     <h2>How to play</h2>
-    <p class="muted">Tongits is a Filipino rummy game for 2–3 players with a standard 52-card deck. Empty your hand — or hold the lowest hand — to win the round.</p>
+    <p class="muted">Tongits is a Filipino rummy game for 2–4 players with a standard 52-card deck. Empty your hand — or hold the lowest hand — to win the round.</p>
     <h3>The deal</h3>
-    <p>The dealer gets 13 cards, everyone else 12. The dealer starts and skips the first draw.</p>
+    <p>With 2–3 players the dealer gets 13 cards and everyone else 12. With 4 players the deal is smaller — dealer 10, everyone else 9 — so the stock doesn’t run dry. The dealer starts and skips the first draw.</p>
     <h3>Your turn</h3>
     <p>1. <b>Draw</b> the top stock card — or take the top discard, but only if it lets you lay down a meld right away.<br>
-       2. <b>Meld</b> what you can: a <b>set</b> is 3–4 of the same rank; a <b>run</b> is 3+ cards of one suit in sequence (Ace counts low or high, no wrap-around). You can also <b>lay off</b> (sapaw) a card onto any meld already on the table — yours or an opponent’s.<br>
+       2. <b>Meld</b> what you can: a <b>set</b> is 3–4 of the same rank; a <b>run</b> is 3+ cards of one suit in sequence (<b>Ace is low only</b> — A-2-3 counts, Q-K-A does not). You can also <b>lay off</b> (sapaw) a card onto any meld already on the table — yours or an opponent’s.<br>
        3. <b>Discard</b> one card to end your turn.</p>
     <h3>Winning</h3>
     <p><b>Tongits</b> — get rid of every card and you win the round outright.<br>
@@ -1630,12 +1704,12 @@ function showRules(){
   </div></div>`;
   document.getElementById('r-close').onclick=()=>{ $ov.innerHTML=''; };
 }
- 
+
 /* ---------------- test hook (only active when a test sets the flag) -------- */
 if (window.__TONGITS_TEST__) {
-  window.__tongits = { get S(){return S;}, G, mySeat, render, onRoomUpdate, maybeRunOnlineBot, isBotSeat, getFight, startFight, fightOk, tickTimer, timeoutMove, NET, BOT };
+  window.__tongits = { get S(){return S;}, G, mySeat, render, onRoomUpdate, maybeRunOnlineBot, isBotSeat, getFight, startFight, fightOk, tickTimer, timeoutMove, arrangeHand, sortHand, shuffleHand, groupSelection, NET, BOT };
 }
- 
+
 /* ---------------- boot ---------------- */
 (function boot(){
   let pid = lget('tongits:pid');
@@ -1648,5 +1722,3 @@ if (window.__TONGITS_TEST__) {
   window.addEventListener('fb-ready', ()=>{ if(S.screen==='home') renderHome(); });
 })();
 </script>
- 
-
