@@ -255,6 +255,11 @@
   .gx{background:none; border:none; color:var(--ink-dim); font-size:1rem; line-height:1; padding:0 2px; cursor:pointer}
   .grow{display:flex}
   .grow .card:first-child{margin-left:0}
+
+  .tlrow{display:flex; align-items:center; justify-content:space-between; gap:10px; margin-top:2px}
+  .tllabel{color:var(--ink-dim); font-size:.85rem}
+  #tlbtns .btn{flex:1}
+  .rt{display:flex; gap:6px; align-items:center}
 </style>
 
 <div class="app" id="app"></div>
@@ -616,8 +621,16 @@
     const clone = (o) => JSON.parse(JSON.stringify(o));
 
     function createRoomObj(code, me) {
-      return { code, hostId: me.pid, status: "lobby", updatedAt: Date.now(),
+      return { code, hostId: me.pid, status: "lobby", updatedAt: Date.now(), turnSecs: 30,
         players: [{ pid: me.pid, name: me.name, seat: 0 }], game: null };
+    }
+    function setTurnSecsObj(room, secs) {
+      if (!room) throw new Error("Room is gone.");
+      if (room.status !== "lobby") throw new Error("Set the timer before the game starts.");
+      const allowed = [0, 30, 45, 60];
+      room.turnSecs = allowed.includes(secs) ? secs : 30;
+      room.updatedAt = Date.now();
+      return room;
     }
     function joinRoomObj(room, me) {
       if (!room) throw new Error("No room with that code.");
@@ -682,9 +695,16 @@
       if (!g.melds.some((m) => m.owner === seat)) throw new Error("You need a meld down before you can fight.");
       const oks = [seat];
       room.players.forEach((p) => { if (p.bot && !oks.includes(p.seat)) oks.push(p.seat); });
-      room.fight = { by: seat, oks };
+      room.fight = { by: seat, oks, startedAt: Date.now() };
       if (oks.length >= room.players.length) resolveFight(room);
       room.updatedAt = Date.now();
+      return room;
+    }
+    // deadline reached: OK everyone still outstanding, then resolve (breaks deadlocks)
+    function fightTimeoutObj(room) {
+      if (!room || !room.fight) return room;
+      room.players.forEach((p) => { if (!room.fight.oks.includes(p.seat)) room.fight.oks.push(p.seat); });
+      resolveFight(room);
       return room;
     }
     function fightOkObj(room, seat) {
@@ -704,8 +724,10 @@
       if (!room) return null;
       if (room.status === "lobby") {
         room.players = room.players.filter((p) => p.pid !== pid).map((p, i) => ({ ...p, seat: i }));
-        if (room.players.every((p) => p.bot)) return null; // no humans left → close room
-        if (room.players.length === 0) return null;
+        // no humans left → mark the room closed (we never hard-delete from the client)
+        if (room.players.length === 0 || room.players.every((p) => p.bot)) {
+          room.status = "closed"; room.updatedAt = Date.now(); return room;
+        }
         if (!room.players.some((p) => p.pid === room.hostId)) {
           const firstHuman = room.players.find((p) => !p.bot) || room.players[0];
           room.hostId = firstHuman.pid;
@@ -732,7 +754,7 @@
       room.updatedAt = Date.now();
       return room;
     }
-    return { genCode, clone, createRoomObj, joinRoomObj, startGameObj, applyMoveObj, nextRoundObj, leaveRoomObj, addBotObj, removeBotObj, startFightObj, fightOkObj, cancelFightObj };
+    return { genCode, clone, createRoomObj, joinRoomObj, startGameObj, applyMoveObj, nextRoundObj, leaveRoomObj, addBotObj, removeBotObj, startFightObj, fightOkObj, cancelFightObj, fightTimeoutObj, setTurnSecsObj };
   }
   if (typeof module !== "undefined" && module.exports) module.exports = makeNet;
   if (typeof window !== "undefined") root.TongitsNet = makeNet;
@@ -889,8 +911,8 @@
        * anon public key -> supabaseKey   (the long "anon"/"public" key; safe to ship)
      Run the SQL in SETUP-SUPABASE.md ONCE to create the table, policies & realtime.
      ============================================================================ */
-  const supabaseUrl = "https://wgpzkdbvbpacjwxtlnuf.supabase.co";
-  const supabaseKey = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6IndncHprZGJ2YnBhY2p3eHRsbnVmIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODQ2NDIzMDAsImV4cCI6MjEwMDIxODMwMH0.-619fycUSQsv9D95aMJRuIKHN7-SlyJkcvlyexA6F1g";
+  const supabaseUrl = "https://dzkggqvdspxkqxydsbiq.supabase.co";
+  const supabaseKey = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImR6a2dncXZkc3B4a3F4eWRzYmlxIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODQ5MTI3MjQsImV4cCI6MjEwMDQ4ODcyNH0.Ecw51fjyBlCNYyx-r6mwZoFGnFjb9NLxQQ3h0S7nTV8";
   /* ========================================================================== */
   const configured = supabaseUrl && supabaseKey && !/PASTE_ME/.test(supabaseUrl + supabaseKey);
   if(!configured){
@@ -978,7 +1000,7 @@ function subscribe(code){
 }
 function teardownOnline(){ if(S.unsub){ try{S.unsub();}catch(e){} S.unsub=null; } S.watchCode=null; }
 function onRoomUpdate(room){
-  if(!room){ if(S.mode==='online'){ toast('The room was closed.'); teardownOnline(); S.room=null; S.mode=null; S.screen='home'; render(); } return; }
+  if(!room || room.status==='closed'){ if(S.mode==='online'){ toast('The room was closed.'); teardownOnline(); S.room=null; S.mode=null; S.screen='home'; render(); } return; }
   S.room=room;
   if(S.screen==='lobby' && room.status!=='lobby'){ S.screen='game'; S.selection=[]; }
   render();
@@ -1023,7 +1045,7 @@ const S = {
   room:null, seat:null,
   local:null,
   selection:[], curtain:null, busy:false, unsub:null, watchCode:null, botTimer:null, botToken:null,
-  timerInt:null, clockKey:null, clockWarned:false, clockExpired:false, fightShown:null, lastTick:null,
+  timerInt:null, clockKey:null, clockWarned:false, clockExpired:false, fightShown:null, lastTick:null, setup:null,
   handOrder:[], groups:[], handKey:null, sortMode:'rank',
 };
 
@@ -1034,17 +1056,17 @@ function esc(s){ return String(s).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;',
 
 /* ---------------- sound (Web Audio; no files needed) ---------------- */
 const Sound = (function(){
-  let ctx=null;
+  let ctx=null, muted=false;
   function ac(){ try{ if(!ctx) ctx=new (window.AudioContext||window.webkitAudioContext)(); }catch(e){ ctx=null; } return ctx; }
-  function resume(){ const c=ac(); if(c && c.state==='suspended'){ try{ c.resume(); }catch(e){} } }
-  function beep(freq,start,dur,type,gain){ const c=ac(); if(!c) return; try{
+  function resume(){ if(muted) return; const c=ac(); if(c && c.state==='suspended'){ try{ c.resume(); }catch(e){} } }
+  function beep(freq,start,dur,type,gain){ if(muted) return; const c=ac(); if(!c) return; try{
     const t=c.currentTime+start, o=c.createOscillator(), g=c.createGain();
     o.type=type||'sine'; o.frequency.value=freq; o.connect(g); g.connect(c.destination);
     g.gain.setValueAtTime(0.0001,t); g.gain.exponentialRampToValueAtTime(gain||0.2,t+0.02);
     g.gain.exponentialRampToValueAtTime(0.0001,t+dur); o.start(t); o.stop(t+dur+0.03);
   }catch(e){} }
   return {
-    resume,
+    resume, setMuted(m){ muted=!!m; }, isMuted(){ return muted; },
     turn(){ resume(); beep(659,0,0.15,'sine',0.25); beep(988,0.13,0.22,'sine',0.22); },
     warn(){ resume(); beep(440,0,0.13,'square',0.18); beep(440,0.2,0.16,'square',0.18); },
     tick(n){ resume(); const f=520+(11-n)*32; if(n<=3){ beep(f,0,0.14,'square',0.24); beep(f*1.5,0.05,0.10,'sine',0.12); } else beep(f,0,0.07,'square',0.15); },
@@ -1053,6 +1075,9 @@ const Sound = (function(){
   };
 })();
 document.addEventListener('pointerdown', ()=>Sound.resume(), {passive:true});
+function toggleMute(){ const m=!Sound.isMuted(); Sound.setMuted(m); lset('tongits:muted', m?1:0); if(!m) Sound.resume(); render(); }
+function muteBtnHTML(){ return `<button class="btn ghost sm" id="mute" title="${Sound.isMuted()?'Sound off':'Sound on'}">${Sound.isMuted()?'🔇':'🔊'}</button>`; }
+function bindMute(){ const b=document.getElementById('mute'); if(b) b.onclick=toggleMute; }
 
 /* ---------------- card rendering ---------------- */
 function cardHTML(id, cls){
@@ -1173,13 +1198,17 @@ function renderLobby(){
   const botCount=r.players.filter(p=>p.bot).length;
   $app.innerHTML=`
   <div class="topbar"><span class="brandsm">TONGITS</span>
-    <div class="rt"><button class="btn ghost sm" id="leave">Leave</button></div></div>
+    <div class="rt">${muteBtnHTML()}<button class="btn ghost sm" id="leave">Leave</button></div></div>
   <div class="home">
     <div class="panel stack">
       <p class="muted center">Share this room code with your friends</p>
       <div class="code">${r.code}</div>
       <button class="btn sm ghost" id="copy" style="width:100%">Copy code</button>
       <div class="seatlist">${seats}</div>
+      <div class="tlrow">
+        <span class="tllabel">Turn timer</span>
+        <div class="row" id="tlbtns" style="gap:6px">${turnSecsButtons(r.turnSecs, isHost)}</div>
+      </div>
       ${isHost ? `<div class="row" style="gap:8px">
           <button class="btn ghost sm" id="addbot" style="flex:1" ${r.players.length>=4?'disabled':''}>+ Add bot</button>
           <button class="btn ghost sm" id="rmbot" style="flex:1" ${botCount<1?'disabled':''}>− Remove bot</button>
@@ -1192,11 +1221,23 @@ function renderLobby(){
   </div>`;
   document.getElementById('copy').onclick=async()=>{ try{ await navigator.clipboard.writeText(r.code); toast('Code copied.'); }catch(e){ toast('Copy failed — read it aloud 🙂'); } };
   document.getElementById('leave').onclick=leaveRoom;
+  bindMute();
   if(isHost){
     document.getElementById('start').onclick=startOnlineGame;
     const ab=document.getElementById('addbot'), rb=document.getElementById('rmbot');
     if(ab) ab.onclick=addBot; if(rb) rb.onclick=removeBot;
+    document.querySelectorAll('#tlbtns [data-secs]').forEach(b=> b.onclick=()=>setTurnSecs(+b.dataset.secs));
   }
+}
+function turnSecsButtons(cur, editable){
+  cur = cur==null?30:cur;
+  return [[30,'30s'],[45,'45s'],[60,'60s'],[0,'Off']].map(([s,lbl])=>
+    `<button class="btn xs ${s===cur?'primary':''}" ${editable?`data-secs="${s}"`:'disabled'}>${lbl}</button>`).join('');
+}
+async function setTurnSecs(secs){
+  window.__lastTxErr=null;
+  const res=await window.FB.transaction(S.room.code, room=>{ if(!room||room.hostId!==S.me.pid) return; return NET.setTurnSecsObj(room, secs); });
+  if(!res.committed){ toast((window.__lastTxErr&&window.__lastTxErr.message)||'Could not change the timer.'); window.__lastTxErr=null; }
 }
 
 async function startOnlineGame(){
@@ -1225,6 +1266,8 @@ function showLocalSetup(){
     <div class="row" id="totals" style="gap:8px"></div>
     <h3>How many of them are bots?</h3>
     <div class="row" id="botrow" style="gap:8px"></div>
+    <h3>Turn timer</h3>
+    <div class="row" id="tlbtns" style="gap:6px"></div>
     <div id="names" class="stack"></div>
     <button class="btn ghost sm" id="l-cancel" style="width:100%;margin-top:10px">Back</button>
   </div></div>`;
@@ -1234,12 +1277,16 @@ function showLocalSetup(){
 function renderSetupChoices(){
   const t=S.setup.total, maxBots=t-1;
   if(S.setup.bots>maxBots) S.setup.bots=maxBots;
+  if(S.setup.turnSecs==null) S.setup.turnSecs=30;
   document.getElementById('totals').innerHTML=[2,3,4]
     .map(n=>`<button class="btn ${n===t?'primary':''}" data-total="${n}" style="flex:1">${n}</button>`).join('');
   let bs=''; for(let b=0;b<=maxBots;b++) bs+=`<button class="btn ${b===S.setup.bots?'primary':''}" data-bots="${b}" style="flex:1">${b}</button>`;
   document.getElementById('botrow').innerHTML=bs;
+  document.getElementById('tlbtns').innerHTML=[[30,'30s'],[45,'45s'],[60,'60s'],[0,'Off']]
+    .map(([s,lbl])=>`<button class="btn ${s===S.setup.turnSecs?'primary':''}" data-secs="${s}" style="flex:1">${lbl}</button>`).join('');
   document.querySelectorAll('[data-total]').forEach(b=> b.onclick=()=>{ S.setup.total=+b.dataset.total; renderSetupChoices(); });
   document.querySelectorAll('[data-bots]').forEach(b=> b.onclick=()=>{ S.setup.bots=+b.dataset.bots; renderSetupChoices(); });
+  document.querySelectorAll('[data-secs]').forEach(b=> b.onclick=()=>{ S.setup.turnSecs=+b.dataset.secs; renderSetupChoices(); });
   buildNameFields({ humans:t-S.setup.bots, bots:S.setup.bots });
 }
 function buildNameFields(preset){
@@ -1261,7 +1308,7 @@ function startLocalGame(preset, names){
   for(let b=0;b<preset.bots;b++) players.push({ name:bn[b%bn.length], bot:true, seat:players.length });
   const game=E.newGame(players.map((p,i)=>({id:'L'+i,name:p.name})),{dealer:0});
   const firstHuman=players.findIndex(p=>!p.bot);
-  S.local={ game, players, viewer: firstHuman<0?0:firstHuman };
+  S.local={ game, players, viewer: firstHuman<0?0:firstHuman, turnSecs: (S.setup&&S.setup.turnSecs!=null)?S.setup.turnSecs:30 };
   S.mode='local'; S.screen='game'; S.selection=[]; $ov.innerHTML='';
   localKickoff();
 }
@@ -1389,6 +1436,7 @@ function renderTable_board(g){
   $app.innerHTML=`
   <div class="topbar"><span class="brandsm">TONGITS</span>
     <div class="rt">
+      ${muteBtnHTML()}
       <button class="btn ghost sm" id="t-rules">Rules</button>
       <button class="btn ghost sm" id="t-leave">Leave</button>
     </div></div>
@@ -1415,6 +1463,7 @@ function renderTable_board(g){
   </div>`;
 
   // ---- bind ----
+  bindMute();
   document.getElementById('t-rules').onclick=showRules;
   document.getElementById('t-leave').onclick=()=>{ if(S.mode==='online')leaveRoom(); else { S.local=null;S.mode=null;S.screen='home';render(); } };
 
@@ -1504,7 +1553,7 @@ function startFight(){
       .catch(()=>{});
   } else {
     const oks=[seat]; S.local.players.forEach(p=>{ if(p.bot && !oks.includes(p.seat)) oks.push(p.seat); });
-    S.local.fight={ by:seat, oks };
+    S.local.fight={ by:seat, oks, startedAt:Date.now() };
     if(S.local.fight.oks.length>=S.local.players.length) resolveLocalFight(); else render();
   }
 }
@@ -1547,12 +1596,14 @@ function maybeRenderFight(){
     const remaining=localHumanSeats().filter(s=>!f.oks.includes(s));
     okBtn = remaining.length ? `<button class="btn primary" id="f-ok">OK — ${esc(g.players[remaining[0]].name)}</button>` : '';
   }
-  const canCancel = (S.mode==='online' ? f.by===mySeat() : true);
+  const secsLeft = f.startedAt ? Math.max(0, Math.ceil(FIGHT_TIMEOUT - (Date.now()-f.startedAt)/1000)) : FIGHT_TIMEOUT;
+  const canCancel = (S.mode==='online' ? (f.by===mySeat() || secsLeft<=0) : true);
   $ov.innerHTML=`<div class="overlay"><div class="sheet fightsheet">
     <div class="big">🔥 FIGHT!</div>
     <p class="muted center">${esc(byName)} wants to fight (call). Everyone taps OK, then hands are compared — lowest total wins.</p>
     <div class="okcount">${f.oks.length}/${N} pressed OK</div>
     <div class="okpips">${pips}</div>
+    <p class="muted center" style="font-size:.78rem">Auto-continues in <span id="fightcd">${secsLeft}</span>s if someone's away.</p>
     ${okBtn}
     ${canCancel?`<button class="btn ghost sm" id="f-cancel" style="width:100%;margin-top:8px">Cancel fight</button>`:''}
   </div></div>`;
@@ -1592,6 +1643,22 @@ function groupSelection(){
   S.selection=[];
 }
 
+/* ---------------- fight deadlock guard ---------------- */
+const FIGHT_TIMEOUT = 20; // seconds before an unanswered fight auto-continues
+function maybeResolveStuckFight(){
+  const f=getFight(); if(!f) return;
+  const left = f.startedAt ? (FIGHT_TIMEOUT - (Date.now()-f.startedAt)/1000) : FIGHT_TIMEOUT;
+  const cd=document.getElementById('fightcd'); if(cd) cd.textContent=Math.max(0,Math.ceil(left));
+  if(left>0) return;
+  if(S.mode==='online'){
+    if(S.room && S.room.hostId===S.me.pid) window.FB.transaction(S.room.code, r=> NET.fightTimeoutObj(r)).catch(()=>{});
+  } else if(S.local && S.local.fight){
+    S.local.players.forEach(p=>{ if(!S.local.fight.oks.includes(p.seat)) S.local.fight.oks.push(p.seat); });
+    resolveLocalFight();
+  }
+}
+function gameTick(){ try{ maybeResolveStuckFight(); }catch(e){} try{ tickTimer(); }catch(e){} }
+
 /* ---------------- turn timer + sounds ---------------- */
 function tickTimer(){
   const el=document.getElementById('turnclock');
@@ -1601,7 +1668,9 @@ function tickTimer(){
   if(key!==S.clockKey){ S.clockKey=key; S.clockWarned=false; S.clockExpired=false; S.lastTick=null;
     if(canAct() && !isBotSeat(g.turn)) Sound.turn();
   }
-  const rem = g.turnStart ? Math.max(0, 30-(Date.now()-g.turnStart)/1000) : 30;
+  const limit=getTurnSecs();
+  if(!limit){ if(el) el.textContent='⏱ off'; return; }   // timer turned off by the host
+  const rem = g.turnStart ? Math.max(0, limit-(Date.now()-g.turnStart)/1000) : limit;
   if(el){ el.textContent='⏱ '+Math.ceil(rem)+'s'; el.style.color = rem<=10 ? 'var(--bad)' : 'var(--ink-dim)'; }
   const mine = canAct() && !isBotSeat(g.turn);
   // audible countdown: one tick per second for the last 10 seconds of YOUR turn
@@ -1610,10 +1679,14 @@ function tickTimer(){
   if(!S.clockExpired){
     if(mine && rem<=0){ S.clockExpired=true; timeoutMove(); }
     else if(S.mode==='online' && S.room && S.room.hostId===S.me.pid && !isBotSeat(g.turn)){
-      const past=(Date.now()-(g.turnStart||Date.now()))/1000 - 30;
+      const past=(Date.now()-(g.turnStart||Date.now()))/1000 - limit;
       if(past>=3){ S.clockExpired=true; timeoutMove(g.turn); }
     }
   }
+}
+function getTurnSecs(){
+  if(S.mode==='online') return (S.room && S.room.turnSecs!=null) ? S.room.turnSecs : 30;
+  return (S.local && S.local.turnSecs!=null) ? S.local.turnSecs : 30;
 }
 function timeoutMove(seat){
   const g=G(); if(!g) return;
@@ -1707,7 +1780,7 @@ function showRules(){
 
 /* ---------------- test hook (only active when a test sets the flag) -------- */
 if (window.__TONGITS_TEST__) {
-  window.__tongits = { get S(){return S;}, G, mySeat, render, onRoomUpdate, maybeRunOnlineBot, isBotSeat, getFight, startFight, fightOk, tickTimer, timeoutMove, arrangeHand, sortHand, shuffleHand, groupSelection, NET, BOT };
+  window.__tongits = { get S(){return S;}, G, mySeat, render, onRoomUpdate, maybeRunOnlineBot, isBotSeat, getFight, startFight, fightOk, tickTimer, gameTick, timeoutMove, getTurnSecs, maybeResolveStuckFight, setTurnSecs, toggleMute, Sound, arrangeHand, sortHand, shuffleHand, groupSelection, NET, BOT };
 }
 
 /* ---------------- boot ---------------- */
@@ -1718,7 +1791,8 @@ if (window.__TONGITS_TEST__) {
   const last = lget('tongits:last');
   if(last && last.name) S.me.name=last.name;
   render();
-  if(!S.timerInt) S.timerInt=setInterval(tickTimer, 250);
+  Sound.setMuted(!!lget('tongits:muted'));
+  if(!S.timerInt) S.timerInt=setInterval(gameTick, 250);
   window.addEventListener('fb-ready', ()=>{ if(S.screen==='home') renderHome(); });
 })();
 </script>
