@@ -1046,6 +1046,7 @@ const S = {
   local:null,
   selection:[], curtain:null, busy:false, unsub:null, watchCode:null, botTimer:null, botToken:null,
   timerInt:null, clockKey:null, clockWarned:false, clockExpired:false, fightShown:null, lastTick:null, setup:null,
+  handScrollKey:null, handScrollLeft:0,
   handOrder:[], groups:[], handKey:null, sortMode:'rank',
 };
 
@@ -1361,6 +1362,11 @@ function renderTable(){
 }
 
 function renderTable_board(g){
+  // remember how far the hand strip is scrolled so a re-render (e.g. tapping a card)
+  // doesn't snap it back to the leftmost card. Keyed per deal so a new round starts fresh.
+  const handScrollKey=(S.mode==='online'?(S.room&&S.room.code):'L')+'#'+(g.round||1)+'#'+viewSeat();
+  const prevHand=document.getElementById('hand');
+  if(prevHand && S.handScrollKey===handScrollKey) S.handScrollLeft=prevHand.scrollLeft;
   const vs=viewSeat(), me=vs, act=canAct();
   const L = act ? E.legal(g, me) : {draw:false,drawDiscard:false,meld:false,sapaw:false,discard:false,call:false};
   const sel=S.selection.slice();
@@ -1461,6 +1467,11 @@ function renderTable_board(g){
       <div class="actions">${actions}</div>
     </div>
   </div>`;
+
+  // restore (or reset, on a new deal) the hand scroll position
+  const handEl=document.getElementById('hand');
+  if(handEl){ handEl.scrollLeft = (S.handScrollKey===handScrollKey) ? (S.handScrollLeft||0) : 0; }
+  S.handScrollKey=handScrollKey;
 
   // ---- bind ----
   bindMute();
@@ -1780,7 +1791,7 @@ function showRules(){
 
 /* ---------------- test hook (only active when a test sets the flag) -------- */
 if (window.__TONGITS_TEST__) {
-  window.__tongits = { get S(){return S;}, G, mySeat, render, onRoomUpdate, maybeRunOnlineBot, isBotSeat, getFight, startFight, fightOk, tickTimer, gameTick, timeoutMove, getTurnSecs, maybeResolveStuckFight, setTurnSecs, toggleMute, Sound, arrangeHand, sortHand, shuffleHand, groupSelection, NET, BOT };
+  window.__tongits = { get S(){return S;}, G, mySeat, render, onRoomUpdate, maybeRunOnlineBot, isBotSeat, getFight, startFight, fightOk, tickTimer, gameTick, timeoutMove, getTurnSecs, maybeResolveStuckFight, setTurnSecs, toggleMute, Sound, arrangeHand, sortHand, shuffleHand, groupSelection, renderTable_board, NET, BOT };
 }
 
 /* ---------------- boot ---------------- */
